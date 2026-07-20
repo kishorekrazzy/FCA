@@ -58,7 +58,7 @@ export function AdminLessonEditor() {
     <label>URL slug<input value={lesson.slug} onChange={(event) => { setSlugTouched(true); setField('slug', slugify(event.target.value)) }} placeholder="maps-before-moves"/></label>
     <div className="field-row">
      <label>Duration<input value={lesson.duration} onChange={(event) => setField('duration', event.target.value)} placeholder="10 min"/></label>
-     <label>XP reward<input type="number" min={5} step={5} value={lesson.xp} onChange={(event) => setField('xp', Number(event.target.value))}/></label>
+     <label>IQ reward<input type="number" min={5} step={5} value={lesson.xp} onChange={(event) => setField('xp', Number(event.target.value))}/></label>
      <label>Type<select value={lesson.type ?? 'standard'} onChange={(event) => setField('type', event.target.value as Lesson['type'])}><option value="standard">Standard</option><option value="test">Section test</option><option value="capstone">Capstone</option></select></label>
     </div>
     <label>Eyebrow label<input value={lesson.eyebrow} onChange={(event) => setField('eyebrow', event.target.value)} placeholder="Module 01 / Practice"/></label>

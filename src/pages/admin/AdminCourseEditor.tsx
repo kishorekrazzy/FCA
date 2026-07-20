@@ -61,7 +61,7 @@ export function AdminCourseEditor() {
    <section className="admin-panel">
     <h2>Course details</h2>
     <label>Title<input value={course.title} onChange={(event) => setField('title', event.target.value)} placeholder="e.g. Systems Thinking for Makers"/></label>
-    <label>URL slug<input value={course.slug} onChange={(event) => setSlugField(event.target.value)} placeholder="systems-thinking"/></label>
+    <label>URL slug<input value={course.slug} onChange={(event) => setSlugField(event.target.value)} placeholder="my-first-course"/></label>
     <label>Subtitle<input value={course.subtitle} onChange={(event) => setField('subtitle', event.target.value)} placeholder="One-line hook"/></label>
     <label>Description<textarea value={course.description} onChange={(event) => setField('description', event.target.value)} rows={3}/></label>
     <label>Tagline (poster card)<input value={course.tagline ?? ''} onChange={(event) => setField('tagline', event.target.value)} placeholder='"Notice more. React less."'/></label>
@@ -95,7 +95,7 @@ export function AdminCourseEditor() {
       <button className="block-delete" onClick={() => deleteModule(moduleIndex)} aria-label="Delete module"><Trash2/></button>
      </div>
      {module.lessons.map((lesson, lessonIndex) => <div className="admin-lesson-row" key={lesson.slug || lessonIndex}>
-      <span>{lesson.title || <i>Untitled lesson</i>}</span><small>{lesson.duration} · {lesson.xp} XP</small>
+      <span>{lesson.title || <i>Untitled lesson</i>}</span><small>{lesson.duration} · {lesson.xp} IQ</small>
       <div className="block-order"><button onClick={() => moveLesson(moduleIndex, lessonIndex, -1)} disabled={lessonIndex === 0} aria-label="Move lesson up"><ChevronUp/></button><button onClick={() => moveLesson(moduleIndex, lessonIndex, 1)} disabled={lessonIndex === module.lessons.length - 1} aria-label="Move lesson down"><ChevronDown/></button></div>
       <Link to={`/admin/courses/${course.slug}/lessons/${encodeURIComponent(lesson.slug)}?m=${moduleIndex}`} aria-label="Edit lesson"><Pencil/></Link>
       <button className="block-delete" onClick={() => deleteLesson(moduleIndex, lessonIndex)} aria-label="Delete lesson"><Trash2/></button>

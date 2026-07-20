@@ -18,21 +18,21 @@ const In = () => <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5
 const Yt = () => <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 7.2s-.2-1.6-.9-2.3c-.9-.9-1.9-.9-2.3-1C16.6 3.6 12 3.6 12 3.6s-4.6 0-7.8.3c-.4.1-1.4.1-2.3 1-.7.7-.9 2.3-.9 2.3S.8 9.1.8 11v1.8c0 1.9.2 3.8.2 3.8s.2 1.6.9 2.3c.9.9 2 .9 2.5 1 1.8.2 7.6.3 7.6.3s4.6 0 7.8-.3c.4-.1 1.4-.1 2.3-1 .7-.7.9-2.3.9-2.3s.2-1.9.2-3.8V11c0-1.9-.2-3.8-.2-3.8zM9.9 15.1V8.4l6.2 3.4-6.2 3.3z"/></svg>
 
 const pile = [
- { text: 'SYSTEMS THINKING (FEEDBACK LOOPS)', x: '-5%', y: '-7%', r: -14, c: '#6871FA' },
+ { text: 'FEEDBACK LOOPS', x: '-5%', y: '-7%', r: -14, c: '#6871FA' },
  { text: 'TASTE CALIBRATION', x: '15%', y: '-9%', r: 9, c: '#A993F8' },
- { text: 'STREAKS, XP & PROOF', x: '37%', y: '-11%', r: -6, c: '#FFD86B' },
- { text: 'PROTOTYPE LAB: SMALLEST TRUE TEST', x: '59%', y: '-8%', r: 12, c: '#CDC6FB' },
- { text: 'MAKER GRANT 2026', x: '81%', y: '-10%', r: -17, c: '#6871FA' },
- { text: 'RESEARCH RITUALS', x: '-8%', y: '26%', r: 13, c: '#FFD86B' },
+ { text: 'STREAKS, IQ & PROOF', x: '37%', y: '-11%', r: -6, c: '#FFD86B' },
+ { text: 'SMALLEST TRUE TEST', x: '59%', y: '-8%', r: 12, c: '#CDC6FB' },
+ { text: 'SHIP SMALL, SHIP OFTEN', x: '81%', y: '-10%', r: -17, c: '#6871FA' },
+ { text: 'ASK BETTER QUESTIONS', x: '-8%', y: '26%', r: 13, c: '#FFD86B' },
  { text: 'MAPS BEFORE MOVES', x: '13%', y: '23%', r: -19, c: '#CDC6FB' },
  { text: 'FIELD NOTES & DAILY DRILLS', x: '36%', y: '27%', r: 7, c: '#5952F4' },
  { text: 'DECISION DESIGN', x: '60%', y: '24%', r: -9, c: '#A993F8' },
  { text: 'LEVERAGE OVER EFFORT', x: '82%', y: '27%', r: 15, c: '#FFD86B' },
- { text: 'QUESTION BANKS & EVIDENCE TRAILS', x: '-6%', y: '58%', r: -8, c: '#A993F8' },
- { text: 'CREATIVE DIRECTION, CLEARLY', x: '16%', y: '62%', r: 11, c: '#FFD86B' },
+ { text: 'EVIDENCE OVER OPINION', x: '-6%', y: '58%', r: -8, c: '#A993F8' },
+ { text: 'PRACTICED, NOT WATCHED', x: '16%', y: '62%', r: 11, c: '#FFD86B' },
  { text: 'CERTIFICATES THAT VERIFY', x: '38%', y: '59%', r: -13, c: '#6871FA' },
- { text: 'THE QUESTION BANK', x: '61%', y: '63%', r: 6, c: '#CDC6FB' },
- { text: 'CAPSTONE: DRAW THE SYSTEM', x: '82%', y: '60%', r: -11, c: '#5952F4' },
+ { text: 'BUILD TO LEARN', x: '61%', y: '63%', r: 6, c: '#CDC6FB' },
+ { text: 'NOTICE MORE, REACT LESS', x: '82%', y: '60%', r: -11, c: '#5952F4' },
 ]
 
 const timeAgo = (timestamp: number) => {
@@ -219,6 +219,7 @@ export function Community() {
      </article></Reveal>
     })}</div>
     {!posts.length && tab === 'friends' && <div className="empty"><p>{user ? 'Your friends haven\'t posted yet — invite some from the sidebar.' : 'Sign in and add friends to see their posts here.'}</p></div>}
+    {!posts.length && tab !== 'friends' && <div className="empty"><p>Nobody's posted yet — be the first to share something above.</p></div>}
    </div>
 
    <aside className="feed-sidebar">

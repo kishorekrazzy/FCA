@@ -6,7 +6,7 @@ import { Catalog } from './pages/Catalog'
 import { CourseDetail } from './pages/CourseDetail'
 import { Lesson } from './pages/Lesson'
 import { Dashboard } from './pages/Dashboard'
-import { Campaign } from './pages/Campaign'
+import { Events } from './pages/Events'
 import { Certificate, VerifyCertificate } from './pages/Certificate'
 import { SignIn } from './pages/SignIn'
 import { Community } from './pages/Community'
@@ -112,7 +112,7 @@ function Shell() {
    <Route path="/community" element={<Community/>}/>
    <Route path="/profile/:uid" element={<Profile/>}/>
    <Route path="/messages" element={<Messages/>}/>
-   <Route path="/campaigns/:slug" element={<Campaign/>}/>
+   <Route path="/events" element={<Events/>}/>
    <Route path="/certificates/:certId" element={<VerifyCertificate/>}/>
    <Route path="/auth/sign-in" element={<SignIn/>}/>
    <Route path="/admin" element={<Admin><AdminOverview/></Admin>}/>

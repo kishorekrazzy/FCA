@@ -19,7 +19,7 @@ export type DailyReward = { lastClaimedDate: string | null; streak: number }
 // doesn't run away — day 1 is 20 IQ, day 5+ tops out at 100 IQ.
 export const dailyRewardAmount = (streak: number) => Math.min(20 + (streak - 1) * 5, 100)
 
-type AcademyState = {
+export type AcademyState = {
   enrolled: string[]
   completed: string[]
   xp: number

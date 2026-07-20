@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { BookOpen, Compass, GraduationCap, MessageCircle, MessagesSquare, Search } from 'lucide-react'
+import { BookOpen, Compass, GraduationCap, MessageCircle, MessagesSquare, Search, Shield } from 'lucide-react'
 import { useAcademyStore } from '../../store/academy-store'
 import { useAuthStore } from '../../store/auth-store'
+import { useAdminStore } from '../../store/admin-store'
+
+const ADMIN_EMAIL = 'kishore.officialedit@gmail.com'
 
 export function TopNav() {
   const xp = useAcademyStore((state) => state.xp)
   const streak = useAcademyStore((state) => state.streak)
   const user = useAuthStore((state) => state.user)
   const navigate = useNavigate()
+  const openAdmin = () => { useAdminStore.getState().unlock('ck24'); navigate('/admin') }
   const [hidden, setHidden] = useState(false)
   useEffect(() => {
     let last = 0
@@ -16,7 +20,7 @@ export function TopNav() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
-  return <header className={`top-nav ${hidden ? 'nav-hidden' : ''}`}><Link className="brand" to="/"><img className="brand-logo" src="/logo.svg" alt="Future Creators Academy"/><span className="brand-text">FUTURE CREATORS <span>ACADEMY</span></span></Link><nav><NavLink to="/academy">Academy</NavLink><NavLink to="/community">Community</NavLink><NavLink to="/events">Events <b>NEW</b></NavLink><NavLink to="/dashboard">Dashboard</NavLink></nav><div className="nav-actions">{user && <Link aria-label="Messages" to="/messages"><MessageCircle size={17}/></Link>}<button aria-label="Search courses" onClick={() => navigate('/academy?focus=1')}><Search size={17}/></button><span className="xp-chip"><img className="mini-icon" src="/icon-xp.svg" alt=""/>{xp.toLocaleString()} IQ</span>{streak > 0 && <span className="streak"><img className="mini-icon" src="/icon-streak.svg" alt=""/> {streak}</span>}{user ? <Link className="avatar" to="/dashboard" aria-label="Your dashboard">{user.photoURL ? <img src={user.photoURL} alt="" referrerPolicy="no-referrer"/> : (user.displayName ?? "FC").slice(0, 2).toUpperCase()}</Link> : <Link className="button light sign-in-btn" to="/auth/sign-in">Sign in</Link>}</div></header>
+  return <header className={`top-nav ${hidden ? 'nav-hidden' : ''}`}><Link className="brand" to="/"><img className="brand-logo" src="/logo.svg" alt="Future Creators Academy"/><span className="brand-text">FUTURE CREATORS <span>ACADEMY</span></span></Link><nav><NavLink to="/academy">Academy</NavLink><NavLink to="/community">Community</NavLink><NavLink to="/events">Events <b>NEW</b></NavLink><NavLink to="/dashboard">Dashboard</NavLink></nav><div className="nav-actions">{user?.email === ADMIN_EMAIL && <button aria-label="Admin" onClick={openAdmin}><Shield size={17}/></button>}{user && <Link aria-label="Messages" to="/messages"><MessageCircle size={17}/></Link>}<button aria-label="Search courses" onClick={() => navigate('/academy?focus=1')}><Search size={17}/></button><span className="xp-chip"><img className="mini-icon" src="/icon-xp.svg" alt=""/>{xp.toLocaleString()} IQ</span>{streak > 0 && <span className="streak"><img className="mini-icon" src="/icon-streak.svg" alt=""/> {streak}</span>}{user ? <Link className="avatar" to="/dashboard" aria-label="Your dashboard">{user.photoURL ? <img src={user.photoURL} alt="" referrerPolicy="no-referrer"/> : (user.displayName ?? "FC").slice(0, 2).toUpperCase()}</Link> : <Link className="button light sign-in-btn" to="/auth/sign-in">Sign in</Link>}</div></header>
 }
 
 export function Footer() {

@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-const PASSCODE = 'FCA-ADMIN-2026'
+const PASSCODE = 'ck24'
 
 type AdminState = {
   unlocked: boolean
