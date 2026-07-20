@@ -79,6 +79,15 @@ p{color:var(--text-2);line-height:1.7}
 .poster-art:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,6,10,.18) 0%,transparent 22%,transparent 46%,rgba(5,6,10,.9) 82%)}
 .poster-tagline{position:absolute;top:19px;left:22px;z-index:2;font-family:'New York','Iowan Old Style',Georgia,'Times New Roman',serif;font-size:13.5px;letter-spacing:.01em;color:rgba(255,255,255,.88)}
 .poster-body{position:relative;z-index:2}
+/* On devices with a real mouse, the poster stays a clean, textless poster until
+   hovered — text and the darkening gradient fade in together only then. Touch
+   devices keep everything visible always, since there's no hover to reveal it with. */
+@media (hover:hover) and (pointer:fine) {
+ .poster-art:after{opacity:0;transition:opacity .4s var(--ease)}
+ .poster-card:hover .poster-art:after{opacity:1}
+ .poster-tagline,.poster-body,.poster-meta{opacity:0;transform:translateY(8px);transition:opacity .35s var(--ease),transform .35s var(--ease);pointer-events:none}
+ .poster-card:hover .poster-tagline,.poster-card:hover .poster-body,.poster-card:hover .poster-meta{opacity:1;transform:translateY(0);pointer-events:auto}
+}
 .poster-body h3{font-family:'New York','Iowan Old Style',Georgia,'Times New Roman',serif;font-weight:600;font-size:25px;letter-spacing:-.01em;line-height:1.12;margin:0 0 8px;color:#F6F4EF}
 .poster-body p{font-size:12.5px;line-height:1.55;color:rgba(235,235,245,.66);margin:0 0 16px;max-width:30ch}
 .poster-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border-radius:999px;font-size:12px;font-weight:600;color:#F2EDE4;background:rgba(120,95,60,.32);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(6px)}
