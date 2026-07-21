@@ -19,11 +19,14 @@ export type DailyReward = { lastClaimedDate: string | null; streak: number }
 // doesn't run away — day 1 is 20 IQ, day 5+ tops out at 100 IQ.
 export const dailyRewardAmount = (streak: number) => Math.min(20 + (streak - 1) * 5, 100)
 
+export const MAX_STREAK_FREEZES = 3
+
 export type AcademyState = {
   enrolled: string[]
   completed: string[]
   xp: number
   streak: number
+  streakFreezes: number
   lastActive: string | null
   reader: boolean
   reviews: Record<string, ReviewSchedule>
@@ -48,6 +51,7 @@ export const useAcademyStore = create<AcademyState>()(persist((set, get) => ({
   completed: [],
   xp: 0,
   streak: 0,
+  streakFreezes: 1,
   lastActive: null,
   reader: false,
   reviews: {},
@@ -59,11 +63,21 @@ export const useAcademyStore = create<AcademyState>()(persist((set, get) => ({
     if (state.completed.includes(lesson)) return state
     const today = new Date().toDateString()
     const yesterday = new Date(Date.now() - DAY).toDateString()
-    const streak = state.lastActive === today ? Math.max(state.streak, 1) : state.lastActive === yesterday ? state.streak + 1 : 1
+    const dayBeforeYesterday = new Date(Date.now() - 2 * DAY).toDateString()
+    let streak = state.streak
+    let streakFreezes = state.streakFreezes
+    if (state.lastActive === today) streak = Math.max(state.streak, 1)
+    else if (state.lastActive === yesterday) streak = state.streak + 1
+    else if (state.lastActive === dayBeforeYesterday && state.streakFreezes > 0) { streak = state.streak + 1; streakFreezes -= 1 }
+    else streak = 1
+    // A streak freeze auto-covers exactly one missed day. Earn one back every full
+    // week kept alive, capped so they can't be hoarded indefinitely.
+    if (streak > 0 && streak % 7 === 0 && streakFreezes < MAX_STREAK_FREEZES) streakFreezes += 1
     return {
       completed: [...state.completed, lesson],
       xp: state.xp + xp,
       streak,
+      streakFreezes,
       lastActive: today,
       enrolled: state.enrolled.includes(courseSlug) ? state.enrolled : [...state.enrolled, courseSlug],
       reviews: { ...state.reviews, [lesson]: { due: Date.now() + DAY, interval: 1, ease: 2.5, reps: 0 } },

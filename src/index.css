@@ -928,7 +928,7 @@ tr:hover .admin-thumb img{transform:scale(1.15)}
 }
 
 /* ---- Dashboard: review queue, learning paths, challenges, analytics ---- */
-.dash-review,.dash-paths,.dash-challenges,.dash-analytics{margin-top:90px}
+.dash-review,.dash-paths,.dash-challenges,.dash-analytics,.dash-leaderboard{margin-top:90px}
 .review-count{font:600 11px/1 var(--font-mono);letter-spacing:.04em;color:var(--accent);border:1px solid color-mix(in srgb,var(--accent),transparent 60%);border-radius:999px;padding:6px 12px}
 .review-list{display:grid;gap:11px}
 .review-card{padding:16px 18px;border:1px solid var(--border);border-radius:14px;background:var(--bg-1);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
@@ -1050,3 +1050,63 @@ tr:hover .admin-thumb img{transform:scale(1.15)}
 .event-confirm input{width:auto;margin:0}
 .event-locked{font-size:11.5px;color:var(--text-3);margin:0}
 .event-card .button.sm{margin-top:2px;align-self:flex-start}
+
+/* ---- Dashboard boosts row (daily reward + streak) ---- */
+.dash-boosts{display:flex;gap:16px;margin-top:28px;flex-wrap:wrap}
+.dash-boosts .daily-reward{flex:1;margin-top:0;min-width:280px}
+.dash-boosts .streak-card{flex:1;min-width:320px}
+
+/* ---- Streak card ---- */
+.streak-card{display:flex;align-items:center;gap:18px;padding:20px 22px;border-radius:20px;background:var(--bg-1);border:1px solid var(--border);position:relative;overflow:hidden}
+.streak-flame{width:54px;height:54px;min-width:54px;border-radius:16px;display:grid;place-items:center;background:radial-gradient(circle,rgba(255,71,133,.22),transparent 70%);color:#FF4785;box-shadow:0 0 28px rgba(255,71,133,.3)}
+.streak-main{flex:1;min-width:0}
+.streak-headline{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+.streak-headline strong{font:800 28px var(--font-display);letter-spacing:-.02em;color:var(--text)}
+.streak-headline span{font-size:12.5px;color:var(--text-3)}
+.streak-progress{margin-bottom:12px}
+.streak-progress small{font-size:10.5px;color:var(--text-3);display:block;margin-top:6px}
+.streak-week{display:flex;gap:6px}
+.streak-day{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px}
+.streak-day-dot{width:22px;height:22px;border-radius:50%;background:var(--bg-inset);border:1px solid var(--border);display:grid;place-items:center;font-size:10.5px;color:transparent;transition:background .2s,border-color .2s,color .2s}
+.streak-day.done .streak-day-dot{background:#FF4785;border-color:#FF4785;color:#fff}
+.streak-day.today .streak-day-dot{box-shadow:0 0 0 2px var(--bg-1),0 0 0 3.5px rgba(255,71,133,.55)}
+.streak-day small{font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.02em}
+.streak-freezes{display:flex;align-items:center;gap:5px;font:600 10.5px var(--font-mono);color:#7DD3FC;background:rgba(125,211,252,.12);padding:6px 10px;border-radius:999px;white-space:nowrap;align-self:flex-start}
+.streak-freezes svg{width:12px}
+
+/* ---- Leaderboard ---- */
+.leaderboard-list{display:flex;flex-direction:column;gap:12px}
+.leaderboard-row{display:flex;align-items:center;gap:14px;padding:14px 20px;border-radius:20px;background:var(--bg-1);border:1px solid var(--border);box-shadow:0 10px 24px rgba(0,0,0,.14);position:relative;overflow:hidden;transition:transform .25s var(--ease),box-shadow .25s}
+.leaderboard-row:hover{transform:translateY(-2px)}
+.leaderboard-rank{width:32px;height:32px;min-width:32px;border-radius:50%;display:grid;place-items:center;font:800 14px var(--font-display);background:var(--bg-inset);color:var(--text-2);border:2px solid var(--border-strong)}
+.leaderboard-row.rank-1 .leaderboard-rank{background:#fff;color:#E8890C;border-color:rgba(255,255,255,.7)}
+.leaderboard-row.rank-2 .leaderboard-rank{background:#fff;color:#7C8697;border-color:rgba(255,255,255,.5)}
+.leaderboard-row.rank-3 .leaderboard-rank{background:#fff;color:#B0703B;border-color:rgba(255,255,255,.4)}
+.leaderboard-avatar{width:38px;height:38px;min-width:38px;border-radius:50%;overflow:hidden;background:var(--gradient-brand);display:grid;place-items:center;font:700 12.5px var(--font-mono);color:#fff}
+.leaderboard-avatar img{width:100%;height:100%;object-fit:cover}
+.leaderboard-name{font-weight:700;font-size:14.5px;letter-spacing:-.01em;flex:1;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.leaderboard-xp{display:flex;align-items:center;gap:5px;font:700 13.5px var(--font-text);color:var(--accent);white-space:nowrap}
+.leaderboard-xp svg{width:13px;color:var(--accent)}
+.leaderboard-row.rank-1{background:linear-gradient(135deg,#FFCF5C,#FF9A2E);border-color:transparent;box-shadow:0 16px 40px rgba(255,159,46,.35);padding:18px 20px}
+.leaderboard-row.rank-1:before{content:"";position:absolute;top:0;left:8%;right:8%;height:2px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.95),transparent);filter:blur(.5px)}
+.leaderboard-row.rank-1 .leaderboard-name{color:#5B3200;font-size:16px}
+.leaderboard-row.rank-1 .leaderboard-xp{color:#8A4B00}
+.leaderboard-row.rank-1 .leaderboard-xp svg{color:#8A4B00}
+.leaderboard-row.rank-rest{opacity:.85}
+
+/* ---- Leader spotlight (Events page) ---- */
+.events-top{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:48px}
+.events-top>div:first-child{max-width:540px}
+.leader-spotlight{display:inline-flex;flex-direction:column;gap:9px;padding:14px 22px;border-radius:22px;background:linear-gradient(135deg,#FFCF5C,#FF9A2E);box-shadow:0 16px 40px rgba(255,159,46,.3)}
+.leader-spotlight-badge{display:flex;align-items:center;gap:5px;font:700 10px var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:#7A3E00}
+.leader-spotlight-row{display:flex;align-items:center;gap:10px}
+.leader-spotlight-row .leaderboard-avatar{width:34px;height:34px;min-width:34px;border:2px solid rgba(255,255,255,.55)}
+.leader-spotlight-name{font-weight:800;color:#5B3200;font-size:15px;white-space:nowrap}
+.leader-spotlight-xp{font-weight:700;color:#8A4B00;font-size:12.5px;font-family:var(--font-mono);white-space:nowrap}
+
+@media(max-width:800px){
+.dash-boosts{flex-direction:column}
+.streak-card{flex-direction:column;align-items:flex-start}
+.streak-freezes{align-self:auto}
+.events-top{flex-direction:column;align-items:flex-start}
+}

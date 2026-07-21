@@ -45,7 +45,7 @@ function useProgressSync() {
    const state = useAcademyStore.getState()
    const profile = useAuthStore.getState().user
    setDoc(ref, {
-    completed: state.completed, enrolled: state.enrolled, xp: state.xp, streak: state.streak, lastActive: state.lastActive,
+    completed: state.completed, enrolled: state.enrolled, xp: state.xp, streak: state.streak, streakFreezes: state.streakFreezes, lastActive: state.lastActive,
     reviews: state.reviews, activityLog: state.activityLog, claimedChallenges: state.claimedChallenges, dailyReward: state.dailyReward,
     displayName: profile?.displayName ?? null, email: profile?.email ?? null, photoURL: profile?.photoURL ?? null,
     ...(publicId ? { publicId } : {}),
@@ -62,6 +62,7 @@ function useProgressSync() {
      enrolled: [...new Set([...state.enrolled, ...(remote.enrolled ?? [])])],
      xp: Math.max(state.xp, remote.xp ?? 0),
      streak: Math.max(state.streak, remote.streak ?? 0),
+     streakFreezes: Math.max(state.streakFreezes, remote.streakFreezes ?? 0),
      lastActive: remote.lastActive ?? state.lastActive,
      reviews: { ...(remote.reviews ?? {}), ...state.reviews },
      activityLog: Object.fromEntries([...activityDays].map((day) => [day, Math.max(state.activityLog[day] ?? 0, remote.activityLog?.[day] ?? 0)])),

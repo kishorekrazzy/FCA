@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Check, Gift, Trophy } from 'lucide-react'
 import { Reveal } from '../components/fx'
 import { ProgressBar } from '../components/ui/Course'
+import { LeaderSpotlight } from '../components/ui/Leaderboard'
 import { useAuthStore } from '../store/auth-store'
 import { countCertificates, dateKey, useAcademyStore, type AcademyState } from '../store/academy-store'
 import { useChallenges, type Challenge } from '../store/challenges-store'
@@ -52,7 +53,7 @@ export function Events() {
  })
 
  return <main className="events-page page">
-  <Reveal><span className="kicker"><Trophy size={13}/> Gamified</span><h1>Earn IQ through <em>events.</em></h1><p>Time-boxed challenges and one-off events — some track your progress automatically, others just need your word.</p></Reveal>
+  <div className="events-top"><Reveal><span className="kicker"><Trophy size={13}/> Gamified</span><h1>Earn IQ through <em>events.</em></h1><p>Time-boxed challenges and one-off events — some track your progress automatically, others just need your word.</p></Reveal><Reveal delay={80}><LeaderSpotlight/></Reveal></div>
   {!sorted.length && <div className="empty"><p>No events yet — check back soon.</p></div>}
   <div className="events-grid">{sorted.map((challenge, index) => <Reveal delay={index * 60} key={challenge.id}><EventCard challenge={challenge} signedIn={!!user} state={state} onClaim={state.claimChallenge}/></Reveal>)}</div>
  </main>

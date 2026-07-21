@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { useCourses } from '../data/catalog'
 import { CourseArt, ProgressBar } from '../components/ui/Course'
 import { ActivityHeatmap, SkillRadar } from '../components/ui/Analytics'
+import { StreakCard } from '../components/ui/StreakCard'
+import { Leaderboard } from '../components/ui/Leaderboard'
 import { achievementRules, dailyRewardAmount, dateKey, levelFor, levelProgress, useAcademyStore, xpToNext, type DailyReward, type ReviewQuality } from '../store/academy-store'
 import { useActiveChallenges, type Challenge } from '../store/challenges-store'
 import { usePaths } from '../store/paths-store'
@@ -82,13 +84,14 @@ export function Dashboard() {
  const unlocked = achievementRules.filter(rule => rule.unlocked(state))
  const resumeLink = (courseSlug: string) => { const course = courses.find(item => item.slug === courseSlug)!; const next = allLessons(course).find(lesson => !state.completed.includes(lesson.slug)); return next ? `/academy/${courseSlug}/${next.slug}` : `/academy/${courseSlug}/certificate` }
  return <main className="dashboard page"><section className="dash-hero"><div><span className="kicker">Your practice</span><h1>{greeting()},<br/><em>{user?.displayName ? user.displayName.split(" ")[0] : "curious one"}.</em></h1><p>Every small return to the work counts.{user && <> · <Link className="link-button" to={`/profile/${user.uid}`}>View public profile</Link> · <button className="link-button" onClick={() => signOutUser()}>Sign out</button></>}</p></div><div className="level-card"><span>LEVEL {String(levelFor(state.xp)).padStart(2, '0')}</span><strong><CountUp to={state.xp}/></strong><small>IQ COLLECTED</small><ProgressBar value={levelProgress(state.xp)}/><p>{xpToNext(state.xp)} IQ to level {levelFor(state.xp) + 1}</p></div></section>
- {user && <DailyRewardCard dailyReward={state.dailyReward} onClaim={state.claimDailyReward}/>}
+ {user && <div className="dash-boosts"><DailyRewardCard dailyReward={state.dailyReward} onClaim={state.claimDailyReward}/><StreakCard streak={state.streak} streakFreezes={state.streakFreezes} activityLog={state.activityLog}/></div>}
  <section className="dash-stats"><article><img className="stat-icon" src="/icon-streak.svg" alt=""/><div><strong>{state.streak} {state.streak === 1 ? 'day' : 'days'}</strong><p>current streak</p></div><span>{state.streak > 0 ? 'Keep the ember alive.' : 'Complete a lesson to start one.'}</span></article><article><img className="stat-icon" src="/icon-xp.svg" alt=""/><div><strong><CountUp to={state.completed.length}/></strong><p>lessons completed</p></div><span>Every rep sharpens the instinct.</span></article><article><Award/><div><strong>{String(unlocked.length).padStart(2, '0')}</strong><p>{unlocked.length === 1 ? 'badge earned' : 'badges earned'}</p></div><span>{unlocked.length ? unlocked[unlocked.length - 1].title + ' unlocked.' : 'Your shelf is waiting.'}</span></article></section>
  <section className="learning"><div className="section-heading"><div><span className="kicker">Continue</span><h2>In your <em>orbit.</em></h2></div></div>{active.length ? <div className="continue-list">{active.map(course => <article key={course.slug}><CourseArt course={course}/><div><span className="kicker">{course.category}</span><h3>{course.title}</h3><p>{state.progress(course.slug)}% complete</p><ProgressBar value={state.progress(course.slug)}/></div><Link className="button ghost" to={resumeLink(course.slug)}>{state.progress(course.slug) === 100 ? 'Certificate' : 'Resume'} <ArrowRight/></Link></article>)}</div> : <div className="empty"><p>Your next curiosity is waiting.</p><Link className="button primary" to="/academy">Explore courses</Link></div>}</section>
  <section className="achievements"><span className="kicker">Achievement shelf</span><div>{achievementRules.map(rule => <article className={`achievement ${rule.unlocked(state) ? 'unlocked' : ''}`} key={rule.key}><span>{rule.icon}</span><h3>{rule.title}</h3><p>{rule.body}</p></article>)}</div></section>
  <ReviewQueue reviews={state.reviews} courses={courses} onReview={state.reviewLesson}/>
  <LearningPaths courses={courses} progress={state.progress}/>
  <WeeklyChallenges streak={state.streak} activityLog={state.activityLog} claimed={state.claimedChallenges} onClaim={state.claimChallenge}/>
+ <section className="dash-leaderboard"><div className="section-heading"><div><span className="kicker"><Trophy size={12}/> Top IQ</span><h2>Leader<em>board.</em></h2></div></div><Leaderboard limit={5}/></section>
  <section className="dash-analytics"><div className="section-heading"><div><span className="kicker">Your data</span><h2>Personal <em>analytics.</em></h2></div></div>
   <div className="analytics-grid">
    <div className="analytics-card"><h3>Activity, last 16 weeks</h3><ActivityHeatmap log={state.activityLog}/></div>
