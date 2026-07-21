@@ -3,10 +3,8 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { BookOpen, Compass, GraduationCap, MessageCircle, MessagesSquare, Moon, Search, Shield, Sun } from 'lucide-react'
 import { useAcademyStore } from '../../store/academy-store'
 import { useAuthStore } from '../../store/auth-store'
-import { useAdminStore } from '../../store/admin-store'
+import { ADMIN_EMAIL, useAdminStore } from '../../store/admin-store'
 import { useThemeStore } from '../../store/theme-store'
-
-const ADMIN_EMAIL = 'kishore.officialedit@gmail.com'
 
 export function TopNav() {
   const xp = useAcademyStore((state) => state.xp)
@@ -27,7 +25,7 @@ export function TopNav() {
 }
 
 export function Footer() {
-  return <footer className="footer"><div className="footer-word" aria-hidden="true"><div className="fw-inner"><span className="fw-seg">F<span className="fw-rest">uture</span></span><span className="fw-seg">C<span className="fw-rest">reators</span></span><span className="fw-seg">A<span className="fw-rest">cademy</span></span></div></div><div className="footer-grid"><div><div className="brand"><img className="brand-logo" src="/logo.svg" alt=""/><span className="brand-text">FUTURE CREATORS <span>ACADEMY</span></span></div><p>Learning for people who make what matters. Short, serious courses — practiced, not just watched.</p></div><div><h4>Learn</h4><Link to="/academy">All courses</Link><Link to="/dashboard">My dashboard</Link></div><div><h4>Events</h4><Link to="/events">All events</Link></div></div><div className="footer-base"><span>© 2026 Future Creators Academy</span><span>Made for the curious ✦ <Link to="/admin" className="admin-entry">Admin</Link></span></div></footer>
+  return <footer className="footer"><div className="footer-word" aria-hidden="true"><div className="fw-inner"><span className="fw-seg">F<span className="fw-rest">uture</span></span><span className="fw-seg">C<span className="fw-rest">reators</span></span><span className="fw-seg">A<span className="fw-rest">cademy</span></span></div></div><div className="footer-grid"><div><div className="brand"><img className="brand-logo" src="/logo.svg" alt=""/><span className="brand-text">FUTURE CREATORS <span>ACADEMY</span></span></div><p>Learning for people who make what matters. Short, serious courses — practiced, not just watched.</p></div><div><h4>Learn</h4><Link to="/academy">All courses</Link><Link to="/dashboard">My dashboard</Link></div><div><h4>Events</h4><Link to="/events">All events</Link></div></div><div className="footer-base"><span>© 2026 Future Creators Academy</span><span>Made for the curious ✦</span></div></footer>
 }
 
 export function MobileNav() { return <nav className="mobile-nav"><NavLink to="/" end><Compass/>Home</NavLink><NavLink to="/academy"><BookOpen/>Learn</NavLink><NavLink to="/community"><MessagesSquare/>Commons</NavLink><NavLink to="/dashboard"><GraduationCap/>Progress</NavLink></nav> }

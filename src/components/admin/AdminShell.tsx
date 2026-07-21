@@ -1,16 +1,22 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
-import { Award, BookOpen, LayoutGrid, Lock, Map, MessagesSquare, Sparkles, Trophy, Users } from 'lucide-react'
-import { useAdminStore, ADMIN_PASSCODE_HINT } from '../../store/admin-store'
+import { Award, BookOpen, LayoutGrid, Lock, Map, MessagesSquare, ShieldAlert, Sparkles, Trophy, Users } from 'lucide-react'
+import { ADMIN_EMAIL, useAdminStore } from '../../store/admin-store'
+import { useAuthStore } from '../../store/auth-store'
 
 export function AdminGate({ children }: { children: React.ReactNode }) {
  const unlocked = useAdminStore((state) => state.unlocked)
  const unlock = useAdminStore((state) => state.unlock)
+ const user = useAuthStore((state) => state.user)
  const [code, setCode] = useState('')
  const [error, setError] = useState(false)
- if (unlocked) return <>{children}</>
+ const authorized = user?.email === ADMIN_EMAIL
+ if (unlocked && authorized) return <>{children}</>
+ // Even someone who knows the passcode can't get in unless they're signed in
+ // with the one authorized account — the passcode alone is no longer enough.
+ if (!authorized) return <main className="admin-gate"><div className="admin-gate-card"><span className="brand-mark"><ShieldAlert size={15}/></span><h1>Restricted</h1><p>This area is only available to the site owner's account. Sign in with an authorized account to continue.</p><Link className="button primary full" to="/auth/sign-in">Sign in</Link><Link className="text-link" to="/">← Back to site</Link></div></main>
  const submit = () => { if (unlock(code)) { setError(false) } else setError(true) }
- return <main className="admin-gate"><div className="admin-gate-card"><span className="brand-mark"><Sparkles size={15}/></span><h1>Admin access</h1><p>Enter the operator passcode to manage courses, users, and the community.</p><div className="admin-gate-row"><input type="password" value={code} onChange={(event) => { setCode(event.target.value); setError(false) }} onKeyDown={(event) => event.key === 'Enter' && submit()} placeholder="Passcode" autoFocus/><button className="button primary" onClick={submit}>Enter</button></div>{error && <p className="admin-error">Incorrect passcode.</p>}<p className="admin-hint">Demo passcode: <code>{ADMIN_PASSCODE_HINT}</code> — change it in <code>src/store/admin-store.ts</code> before shipping.</p><Link className="text-link" to="/">← Back to site</Link></div></main>
+ return <main className="admin-gate"><div className="admin-gate-card"><span className="brand-mark"><Sparkles size={15}/></span><h1>Admin access</h1><p>Enter the operator passcode to manage courses, users, and the community.</p><div className="admin-gate-row"><input type="password" value={code} onChange={(event) => { setCode(event.target.value); setError(false) }} onKeyDown={(event) => event.key === 'Enter' && submit()} placeholder="Passcode" autoFocus/><button className="button primary" onClick={submit}>Enter</button></div>{error && <p className="admin-error">Incorrect passcode.</p>}<Link className="text-link" to="/">← Back to site</Link></div></main>
 }
 
 export function AdminShell({ children }: { children: React.ReactNode }) {

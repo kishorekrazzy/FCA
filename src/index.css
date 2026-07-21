@@ -390,8 +390,6 @@ body{padding-bottom:60px}
 .footer-grid h4{font:600 11px var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin:0 0 14px}
 .footer-grid a{display:block;color:var(--text-2);padding:5px 0;transition:color .2s}
 .footer-grid a:hover{color:var(--text)}
-.admin-entry{opacity:.55;margin-left:8px;text-decoration:underline;text-underline-offset:2px}
-.admin-entry:hover{opacity:1}
 .footer-base{display:flex;justify-content:space-between;max-width:1180px;margin:64px auto 0;padding-top:22px;border-top:1px solid var(--border);font-size:11.5px;color:var(--text-3)}
 /* Nav behavior + misc */
 .top-nav{transition:transform .45s var(--ease)}
