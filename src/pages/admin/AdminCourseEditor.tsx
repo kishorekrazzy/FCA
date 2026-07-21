@@ -55,7 +55,7 @@ export function AdminCourseEditor() {
  if (!isNew && !existing) return <div className="admin-page"><p className="admin-empty">{synced ? 'Course not found.' : 'Loading course from Firestore…'}</p></div>
 
  return <div className="admin-page">
-  <header className="admin-header"><div><Link className="text-link" to="/admin/courses"><ArrowLeft size={14}/> All courses</Link><h1>{isNew ? 'New course' : course.title || 'Untitled course'}</h1></div><div className="admin-header-actions"><span className={`save-state ${saveError ? 'error' : saving ? 'saving' : ''}`}>{saveError ? 'Save failed — check Firestore rules' : saving ? 'Saving…' : course.slug ? 'Saved to Firestore ✓' : ''}</span>{course.slug && <Link className="button ghost" to={`/academy/${course.slug}`} target="_blank" rel="noreferrer">Preview live →</Link>}</div></header>
+  <header className="admin-header"><div><Link className="text-link" to="/admin/courses"><ArrowLeft size={14}/> All courses</Link><h1>{isNew ? 'New course' : course.title || 'Untitled course'}</h1></div><div className="admin-header-actions"><span className={`save-state ${saveError ? 'error' : saving ? 'saving' : ''}`}>{saveError ? 'Save failed — check Firestore rules' : saving ? 'Saving…' : course.slug ? 'Saved to Firestore ✓' : ''}</span>{course.slug && <Link className="button ghost" to={`/admin/courses/${course.slug}/exam`}>Final exam</Link>}{course.slug && <Link className="button ghost" to={`/academy/${course.slug}`} target="_blank" rel="noreferrer">Preview live →</Link>}</div></header>
 
   <div className="admin-form-grid">
    <section className="admin-panel">

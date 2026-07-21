@@ -1201,3 +1201,48 @@ tr:hover .admin-thumb img{transform:scale(1.15)}
 .banner-section{padding:22px 18px 0}
 .banner-title{left:16px;bottom:14px;max-width:85%}
 }
+
+/* ---- Final exam ---- */
+/* The exam is always a dark cinematic overlay regardless of site theme, so its
+   text/border tokens are pinned here rather than inherited from :root[data-theme]. */
+.exam-overlay{--text:#F5F5F7;--text-2:rgba(235,235,245,.72);--text-3:rgba(235,235,245,.45);--bg-1:#18181B;--bg-2:#1E1E22;--bg-inset:#141416;--border:rgba(255,255,255,.08);--border-strong:rgba(255,255,255,.15);position:fixed;inset:0;z-index:200;background:radial-gradient(circle at 50% -10%,#1A1230 0%,#0A0A0D 62%);display:flex;flex-direction:column;align-items:center;overflow-y:auto;padding:0 0 60px;animation:enter .35s var(--ease);color:var(--text)}
+.exam-vignette{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;box-shadow:inset 0 0 0 0 rgba(239,68,68,0);transition:opacity .5s ease,box-shadow .5s ease}
+.exam-overlay.exam-danger .exam-vignette{opacity:1;box-shadow:inset 0 0 140px 40px rgba(239,68,68,.55);animation:exam-pulse 1s ease-in-out infinite}
+@keyframes exam-pulse{0%,100%{box-shadow:inset 0 0 120px 30px rgba(239,68,68,.4)}50%{box-shadow:inset 0 0 170px 55px rgba(239,68,68,.72)}}
+.exam-close{position:fixed;top:20px;right:20px;z-index:2;width:38px;height:38px;border-radius:50%;border:1px solid var(--border-strong);background:color-mix(in srgb,var(--bg-1) 80%,transparent);color:var(--text-2);display:grid;place-items:center;backdrop-filter:blur(10px)}
+.exam-progress-track{position:relative;z-index:1;width:min(680px,90vw);height:3px;border-radius:99px;background:var(--border);margin:70px 0 0;overflow:hidden;flex-shrink:0}
+.exam-progress-track span{display:block;height:100%;background:linear-gradient(90deg,var(--primary-500),var(--accent));transition:width .4s var(--ease)}
+.exam-body{position:relative;z-index:1;width:min(680px,90vw);display:flex;flex-direction:column;align-items:stretch;margin-top:28px}
+.exam-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.exam-count{font:600 12px var(--font-mono);letter-spacing:.03em;color:var(--text-3);text-transform:uppercase}
+.exam-timer-ring{position:relative;width:56px;height:56px;display:grid;place-items:center}
+.exam-timer-ring svg{position:absolute;inset:0}
+.exam-timer-ring svg circle{transition:stroke .3s linear}
+.exam-timer-ring span{position:relative;font:700 15px var(--font-display);color:var(--text)}
+.exam-question{font:600 clamp(22px,3.4vw,32px) var(--font-display);letter-spacing:-.01em;line-height:1.28;margin:0 0 20px}
+.exam-question-image{width:100%;max-height:280px;object-fit:cover;border-radius:16px;margin-bottom:22px;border:1px solid var(--border)}
+.exam-options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.exam-option{display:flex;align-items:center;gap:12px;text-align:left;padding:17px 18px;border-radius:14px;border:1px solid var(--border-strong);background:var(--bg-1);color:var(--text);font:500 14.5px var(--font-text);line-height:1.4;transition:transform .18s var(--ease),border-color .18s,background .18s,box-shadow .18s}
+.exam-option:hover:not(:disabled){border-color:var(--primary-500);transform:translateY(-2px)}
+.exam-option:disabled{cursor:default}
+.exam-option-letter{flex-shrink:0;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:color-mix(in srgb,var(--text) 6%,transparent);font:700 12px var(--font-mono);color:var(--text-3)}
+.exam-option.correct{border-color:#22C55E;background:color-mix(in srgb,#22C55E,transparent 88%);box-shadow:0 0 0 1px #22C55E}
+.exam-option.correct .exam-option-letter{background:#22C55E;color:#0A0A0B}
+.exam-option.incorrect{border-color:#EF4444;background:color-mix(in srgb,#EF4444,transparent 88%);box-shadow:0 0 0 1px #EF4444}
+.exam-option.incorrect .exam-option-letter{background:#EF4444;color:#0A0A0B}
+.exam-skip{align-self:center;margin-top:26px;display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text-3);font:600 12.5px var(--font-text)}
+.exam-skip:hover:not(:disabled){color:var(--text-2);border-color:var(--border-strong)}
+.exam-results{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;max-width:420px;margin:auto;padding:40px 24px}
+.exam-results h2{font:600 26px var(--font-display);margin:6px 0 0}
+.exam-results p{color:var(--text-2);font-size:14px;line-height:1.6;margin:0}
+.exam-results-actions{display:flex;flex-direction:column;gap:10px;width:100%;margin-top:8px}
+@media(max-width:640px){
+.exam-options{grid-template-columns:1fr}
+.exam-progress-track{margin-top:56px}
+}
+
+/* ---- Admin: exam question editor ---- */
+.exam-option-editor-list{display:grid;gap:9px;margin-bottom:14px}
+.exam-option-editor-row{display:flex;align-items:center;gap:10px}
+.exam-option-editor-row input[type="radio"]{flex-shrink:0;accent-color:var(--primary-500)}
+.exam-option-editor-row input[type="text"],.exam-option-editor-row input:not([type="radio"]){flex:1}

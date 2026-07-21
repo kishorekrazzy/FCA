@@ -35,6 +35,8 @@ export type AcademyState = {
   dailyReward: DailyReward
   leaderboardVisible: boolean
   setLeaderboardVisible: (visible: boolean) => void
+  examPassed: Record<string, boolean>
+  markExamPassed: (courseSlug: string) => void
   enroll: (course: string) => void
   complete: (courseSlug: string, lesson: string, xp: number) => void
   toggleReader: () => void
@@ -62,6 +64,8 @@ export const useAcademyStore = create<AcademyState>()(persist((set, get) => ({
   dailyReward: { lastClaimedDate: null, streak: 0 },
   leaderboardVisible: true,
   setLeaderboardVisible: (visible) => set({ leaderboardVisible: visible }),
+  examPassed: {},
+  markExamPassed: (courseSlug) => set((state) => ({ examPassed: { ...state.examPassed, [courseSlug]: true } })),
   enroll: (course) => set((state) => ({ enrolled: state.enrolled.includes(course) ? state.enrolled : [...state.enrolled, course] })),
   complete: (courseSlug, lesson, xp) => set((state) => {
     if (state.completed.includes(lesson)) return state

@@ -30,6 +30,7 @@ import { AdminOverview } from './pages/admin/AdminOverview'
 import { AdminCourses } from './pages/admin/AdminCourses'
 import { AdminCourseEditor } from './pages/admin/AdminCourseEditor'
 import { AdminLessonEditor } from './pages/admin/AdminLessonEditor'
+import { AdminExamEditor } from './pages/admin/AdminExamEditor'
 import { AdminUsers } from './pages/admin/AdminUsers'
 import { AdminCertificates } from './pages/admin/AdminCertificates'
 import { AdminCommunity } from './pages/admin/AdminCommunity'
@@ -52,7 +53,7 @@ function useProgressSync() {
    const profile = useAuthStore.getState().user
    setDoc(ref, {
     completed: state.completed, enrolled: state.enrolled, xp: state.xp, streak: state.streak, streakFreezes: state.streakFreezes, lastActive: state.lastActive,
-    reviews: state.reviews, activityLog: state.activityLog, claimedChallenges: state.claimedChallenges, dailyReward: state.dailyReward, leaderboardVisible: state.leaderboardVisible,
+    reviews: state.reviews, activityLog: state.activityLog, claimedChallenges: state.claimedChallenges, dailyReward: state.dailyReward, leaderboardVisible: state.leaderboardVisible, examPassed: state.examPassed,
     displayName: profile?.displayName ?? null, email: profile?.email ?? null, photoURL: profile?.photoURL ?? null,
     ...(publicId ? { publicId } : {}),
    }, { merge: true }).catch(() => {})
@@ -77,6 +78,7 @@ function useProgressSync() {
      // doesn't grant it a second time; otherwise local's claim history stands.
      dailyReward: state.dailyReward.lastClaimedDate === today || remote.dailyReward?.lastClaimedDate !== today ? state.dailyReward : remote.dailyReward,
      leaderboardVisible: remote.leaderboardVisible ?? state.leaderboardVisible,
+     examPassed: { ...(remote.examPassed ?? {}), ...state.examPassed },
     })
    } else {
     setDoc(ref, { joinedAt: serverTimestamp() }, { merge: true }).catch(() => {})
@@ -129,6 +131,7 @@ function Shell() {
    <Route path="/admin/courses/new" element={<Admin><AdminCourseEditor/></Admin>}/>
    <Route path="/admin/courses/:slug" element={<Admin><AdminCourseEditor/></Admin>}/>
    <Route path="/admin/courses/:slug/lessons/:lessonId" element={<Admin><AdminLessonEditor/></Admin>}/>
+   <Route path="/admin/courses/:slug/exam" element={<Admin><AdminExamEditor/></Admin>}/>
    <Route path="/admin/users" element={<Admin><AdminUsers/></Admin>}/>
    <Route path="/admin/certificates" element={<Admin><AdminCertificates/></Admin>}/>
    <Route path="/admin/community" element={<Admin><AdminCommunity/></Admin>}/>

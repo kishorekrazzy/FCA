@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Award, Check, CheckCircle2, Download, ShieldCheck } from 'lucide-react'
+import { Award, Check, CheckCircle2, Download, GraduationCap, ShieldCheck } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import { useCourseBySlug } from '../data/catalog'
 import { useAcademyStore } from '../store/academy-store'
@@ -8,11 +8,19 @@ import { useAuthStore } from '../store/auth-store'
 import { CertificateCard, downloadCertificatePng, formatCertDate } from '../components/ui/CertificateCard'
 import { LinkedInIcon } from '../components/ui/ShareRow'
 import { buildLinkedInAddUrl, certIdFor, recordCertificate, useCertificate } from '../store/certificates-store'
+import { ExamModal } from '../components/ui/ExamModal'
+import { EXAM_PASS_PERCENT, useExamQuestions } from '../store/exam-store'
 
 export function Certificate() {
  const { courseSlug } = useParams(); const course = useCourseBySlug(courseSlug); const progress = useAcademyStore(state => course ? state.progress(course.slug) : 0); const user = useAuthStore(auth => auth.user)
+ const examBank = useExamQuestions(course?.slug)
+ const examPassed = useAcademyStore(state => course ? !!state.examPassed[course.slug] : false)
+ const markExamPassed = useAcademyStore(state => state.markExamPassed)
+ const [examOpen, setExamOpen] = useState(false)
  const [copied, setCopied] = useState(false)
- const unlocked = progress === 100
+ const lessonsDone = progress === 100
+ const needsExam = lessonsDone && examBank.length > 0 && !examPassed
+ const unlocked = lessonsDone && (examBank.length === 0 || examPassed)
  const certId = user && course ? certIdFor(user.uid, course.slug) : undefined
  const { cert } = useCertificate(certId)
 
@@ -40,7 +48,9 @@ export function Certificate() {
   setCopied(true)
   window.setTimeout(() => setCopied(false), 5000)
  }
- return <main className="certificate-page page"><span className="kicker">Course credential</span><h1>Keep the proof<br/>of your <em>practice.</em></h1><p>A shareable, verifiable record of the work you completed.</p><div className="certificate-layout"><Tilt max={5}><div className="certificate">{unlocked && certId ? <CertificateCard name={displayName} courseTitle={course.title} certId={certId} issuedAtMs={issuedAtMs}/> : <CertificateCard name="" courseTitle={course.title} certId="" issuedAtMs={null}/>}</div></Tilt><aside className="certificate-actions">{unlocked ? <><CheckCircle2/><h2>Credential unlocked.</h2><p>Your certificate is ready to save, share, and verify at any time.</p>{certId && <Link className="button light full" to={`/certificates/${certId}`}>View public record</Link>}<button className="button primary full" onClick={download}><Download/> Download certificate</button>{linkedInUrl && <a className="button linkedin-btn full" href={linkedInUrl} target="_blank" rel="noreferrer"><LinkedInIcon/> Add to LinkedIn</a>}<button className="button linkedin-btn full" onClick={postToLinkedIn}>{copied ? <><Check/> Copied — paste on LinkedIn</> : <><LinkedInIcon/> Post on LinkedIn</>}</button>{copied && <p className="linkedin-post-hint">Certificate image downloaded and caption copied. On LinkedIn: start a post, attach the image, then paste your caption.</p>}</> : <><Award/><h2>Keep going.</h2><p>Complete all lessons in this course to unlock this verifiable credential.</p><div className="certificate-progress"><strong>{progress}%</strong><span>course complete</span></div><Link className="button primary" to={`/academy/${course.slug}`}>Return to course</Link></>}</aside></div></main>
+ return <main className="certificate-page page"><span className="kicker">Course credential</span><h1>Keep the proof<br/>of your <em>practice.</em></h1><p>A shareable, verifiable record of the work you completed.</p><div className="certificate-layout"><Tilt max={5}><div className="certificate">{unlocked && certId ? <CertificateCard name={displayName} courseTitle={course.title} certId={certId} issuedAtMs={issuedAtMs}/> : <CertificateCard name="" courseTitle={course.title} certId="" issuedAtMs={null}/>}</div></Tilt><aside className="certificate-actions">{unlocked ? <><CheckCircle2/><h2>Credential unlocked.</h2><p>Your certificate is ready to save, share, and verify at any time.</p>{certId && <Link className="button light full" to={`/certificates/${certId}`}>View public record</Link>}<button className="button primary full" onClick={download}><Download/> Download certificate</button>{linkedInUrl && <a className="button linkedin-btn full" href={linkedInUrl} target="_blank" rel="noreferrer"><LinkedInIcon/> Add to LinkedIn</a>}<button className="button linkedin-btn full" onClick={postToLinkedIn}>{copied ? <><Check/> Copied — paste on LinkedIn</> : <><LinkedInIcon/> Post on LinkedIn</>}</button>{copied && <p className="linkedin-post-hint">Certificate image downloaded and caption copied. On LinkedIn: start a post, attach the image, then paste your caption.</p>}</> : needsExam ? <><GraduationCap/><h2>One last test.</h2><p>Score {EXAM_PASS_PERCENT}% or higher on the final exam to unlock this credential. You'll get 30 random questions, 12 seconds each.</p><button className="button primary full" onClick={() => setExamOpen(true)}>Take the final exam</button></> : <><Award/><h2>Keep going.</h2><p>Complete all lessons in this course to unlock this verifiable credential.</p><div className="certificate-progress"><strong>{progress}%</strong><span>course complete</span></div><Link className="button primary" to={`/academy/${course.slug}`}>Return to course</Link></>}</aside></div>
+  {examOpen && course && <ExamModal bank={examBank} onClose={() => setExamOpen(false)} onPass={() => markExamPassed(course.slug)}/>}
+ </main>
 }
 
 export function VerifyCertificate() {
