@@ -37,6 +37,8 @@ export type AcademyState = {
   setLeaderboardVisible: (visible: boolean) => void
   examPassed: Record<string, boolean>
   markExamPassed: (courseSlug: string) => void
+  savedPostIds: string[]
+  toggleSavedPost: (postId: string) => void
   enroll: (course: string) => void
   complete: (courseSlug: string, lesson: string, xp: number) => void
   toggleReader: () => void
@@ -66,6 +68,8 @@ export const useAcademyStore = create<AcademyState>()(persist((set, get) => ({
   setLeaderboardVisible: (visible) => set({ leaderboardVisible: visible }),
   examPassed: {},
   markExamPassed: (courseSlug) => set((state) => ({ examPassed: { ...state.examPassed, [courseSlug]: true } })),
+  savedPostIds: [],
+  toggleSavedPost: (postId) => set((state) => ({ savedPostIds: state.savedPostIds.includes(postId) ? state.savedPostIds.filter((id) => id !== postId) : [...state.savedPostIds, postId] })),
   enroll: (course) => set((state) => ({ enrolled: state.enrolled.includes(course) ? state.enrolled : [...state.enrolled, course] })),
   complete: (courseSlug, lesson, xp) => set((state) => {
     if (state.completed.includes(lesson)) return state

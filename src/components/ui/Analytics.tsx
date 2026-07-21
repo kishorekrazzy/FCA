@@ -1,23 +1,48 @@
+import { useMemo } from 'react'
 import { allLessons } from '../../types'
 import type { Course } from '../../types'
 
-export function ActivityHeatmap({ log }: { log: Record<string, number> }) {
- const days = 112
- const today = new Date()
- const cells = Array.from({ length: days }, (_, index) => {
-  const date = new Date(today)
-  date.setDate(date.getDate() - (days - 1 - index))
-  const key = date.toISOString().slice(0, 10)
-  return { key, count: log[key] ?? 0 }
- })
- const max = Math.max(1, ...cells.map((cell) => cell.count))
- const levelFor = (count: number) => count === 0 ? 0 : Math.min(4, Math.ceil((count / max) * 4))
- const weeks: (typeof cells)[] = []
- for (let index = 0; index < cells.length; index += 7) weeks.push(cells.slice(index, index + 7))
+const WEEKDAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', '']
 
- return <div className="heatmap">
-  <div className="heatmap-grid">{weeks.map((week, index) => <div className="heatmap-col" key={index}>{week.map((cell) => <span className={`heatmap-cell level-${levelFor(cell.count)}`} key={cell.key} title={`${cell.key}: ${cell.count} ${cell.count === 1 ? 'activity' : 'activities'}`}/>)}</div>)}</div>
-  <div className="heatmap-legend"><span>Less</span>{[0, 1, 2, 3, 4].map((level) => <span className={`heatmap-cell level-${level}`} key={level}/>)}<span>More</span></div>
+/** GitHub-style contribution graph: one column per calendar week, aligned to Sunday,
+ * spanning `weeksCount` weeks back from today. Month labels sit above the column
+ * containing the 1st of that month, matching how GitHub's own graph labels months. */
+export function ContributionGraph({ log, weeksCount = 53 }: { log: Record<string, number>; weeksCount?: number }) {
+ const { weeks, monthLabels, max, totalReps, activeDays } = useMemo(() => {
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  const start = new Date(today)
+  start.setDate(start.getDate() - (weeksCount * 7 - 1))
+  start.setDate(start.getDate() - start.getDay())
+  const days: { key: string; count: number; date: Date }[] = []
+  for (const cursor = new Date(start); cursor <= today; cursor.setDate(cursor.getDate() + 1)) {
+   const key = cursor.toISOString().slice(0, 10)
+   days.push({ key, count: log[key] ?? 0, date: new Date(cursor) })
+  }
+  const weeks: (typeof days)[] = []
+  for (let index = 0; index < days.length; index += 7) weeks.push(days.slice(index, index + 7))
+  const monthLabels = weeks.map((week) => { const firstOfMonth = week.find((day) => day.date.getDate() === 1); return firstOfMonth ? firstOfMonth.date.toLocaleDateString('en-US', { month: 'short' }) : '' })
+  const max = Math.max(1, ...days.map((day) => day.count))
+  const totalReps = days.reduce((sum, day) => sum + day.count, 0)
+  const activeDays = days.filter((day) => day.count > 0).length
+  return { weeks, monthLabels, max, totalReps, activeDays }
+ }, [log, weeksCount])
+
+ const levelFor = (count: number) => count === 0 ? 0 : Math.min(4, Math.ceil((count / max) * 4))
+
+ return <div className="contrib">
+  <div className="contrib-scroll">
+   <div className="contrib-inner">
+    <div className="contrib-months">{monthLabels.map((label, index) => <span key={index}>{label}</span>)}</div>
+    <div className="contrib-body">
+     <div className="contrib-weekdays">{WEEKDAY_LABELS.map((label, index) => <span key={index}>{label}</span>)}</div>
+     <div className="contrib-grid">{weeks.map((week, index) => <div className="contrib-col" key={index}>{week.map((day) => <span className={`contrib-cell level-${levelFor(day.count)}`} key={day.key} title={`${day.date.toDateString()} — ${day.count} ${day.count === 1 ? 'activity' : 'activities'}`}/>)}</div>)}</div>
+    </div>
+   </div>
+  </div>
+  <div className="contrib-foot">
+   <span className="contrib-summary">{totalReps.toLocaleString()} reps logged · {activeDays} active days in the last year</span>
+   <div className="contrib-legend"><span>Less</span>{[0, 1, 2, 3, 4].map((level) => <span className={`contrib-cell level-${level}`} key={level}/>)}<span>More</span></div>
+  </div>
  </div>
 }
 

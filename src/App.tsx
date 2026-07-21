@@ -53,7 +53,7 @@ function useProgressSync() {
    const profile = useAuthStore.getState().user
    setDoc(ref, {
     completed: state.completed, enrolled: state.enrolled, xp: state.xp, streak: state.streak, streakFreezes: state.streakFreezes, lastActive: state.lastActive,
-    reviews: state.reviews, activityLog: state.activityLog, claimedChallenges: state.claimedChallenges, dailyReward: state.dailyReward, leaderboardVisible: state.leaderboardVisible, examPassed: state.examPassed,
+    reviews: state.reviews, activityLog: state.activityLog, claimedChallenges: state.claimedChallenges, dailyReward: state.dailyReward, leaderboardVisible: state.leaderboardVisible, examPassed: state.examPassed, savedPostIds: state.savedPostIds,
     displayName: profile?.displayName ?? null, email: profile?.email ?? null, photoURL: profile?.photoURL ?? null,
     ...(publicId ? { publicId } : {}),
    }, { merge: true }).catch(() => {})
@@ -79,6 +79,7 @@ function useProgressSync() {
      dailyReward: state.dailyReward.lastClaimedDate === today || remote.dailyReward?.lastClaimedDate !== today ? state.dailyReward : remote.dailyReward,
      leaderboardVisible: remote.leaderboardVisible ?? state.leaderboardVisible,
      examPassed: { ...(remote.examPassed ?? {}), ...state.examPassed },
+     savedPostIds: [...new Set([...state.savedPostIds, ...(remote.savedPostIds ?? [])])],
     })
    } else {
     setDoc(ref, { joinedAt: serverTimestamp() }, { merge: true }).catch(() => {})

@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Bookmark, BookOpen, Check, Clock, Flame, Heart, ImagePlus, MessageCircle, MessageSquare, MoreHorizontal, Send, Sparkles, TrendingUp, UserPlus, Users, X } from 'lucide-react'
-import { addDoc, collection, doc, increment, limit, onSnapshot, orderBy, query, serverTimestamp, updateDoc } from 'firebase/firestore'
+import { addDoc, collection, doc, increment, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { Reveal } from '../components/fx'
 import { db } from '../lib/firebase'
 import { useAuthStore } from '../store/auth-store'
+import { useAcademyStore } from '../store/academy-store'
 import { useCommunityStore, type Post } from '../store/community-store'
+import { timeAgo, useAllPosts } from '../data/posts'
 import { useRemoteUsers, type RemoteUser } from '../components/admin/useAdminData'
 import { acceptFriendRequest, declineFriendRequest, redeemReferralCode, sendFriendRequest, useConnections, useFriendState, useIncomingRequests, type RedeemResult } from '../store/connections-store'
 import { addComment, useComments } from '../store/comments-store'
@@ -35,16 +37,7 @@ const pile = [
  { text: 'NOTICE MORE, REACT LESS', x: '82%', y: '60%', r: -11, c: '#5952F4' },
 ]
 
-const timeAgo = (timestamp: number) => {
- const minutes = Math.max(1, Math.round((Date.now() - timestamp) / 60000))
- if (minutes < 60) return `${minutes}m`
- const hours = Math.round(minutes / 60)
- if (hours < 24) return `${hours}h`
- return `${Math.round(hours / 24)}d`
-}
-
 const LIKED_KEY = 'fca-liked'
-const SAVED_KEY = 'fca-saved'
 const readIds = (key: string): string[] => { try { return JSON.parse(localStorage.getItem(key) ?? '[]') } catch { return [] } }
 const engagement = (post: Post) => post.likes + post.replies * 2
 
@@ -82,14 +75,15 @@ function PostComments({ postId, myUid, myName, myPhoto }: { postId: string; myUi
 export function Community() {
  const user = useAuthStore(state => state.user)
  const local = useCommunityStore()
- const [remote, setRemote] = useState<Post[] | null>(null)
+ const savedIds = useAcademyStore((state) => state.savedPostIds)
+ const toggleSavedPost = useAcademyStore((state) => state.toggleSavedPost)
+ const { posts: allPosts, remoteIds, connected } = useAllPosts()
  const [draft, setDraft] = useState('')
  const [imageOpen, setImageOpen] = useState(false)
  const [imageUrl, setImageUrl] = useState('')
  const [coursePickerOpen, setCoursePickerOpen] = useState(false)
  const [attachedCourse, setAttachedCourse] = useState<{ slug: string; title: string } | null>(null)
  const [likedIds, setLikedIds] = useState<string[]>(() => readIds(LIKED_KEY))
- const [savedIds, setSavedIds] = useState<string[]>(() => readIds(SAVED_KEY))
  const [shareMenuId, setShareMenuId] = useState<string | null>(null)
  const [expandedId, setExpandedId] = useState<string | null>(null)
  const [notice, setNotice] = useState('')
@@ -105,23 +99,6 @@ export function Community() {
  const courses = useCourses()
 
  useEffect(() => { if (referralHint) setRedeemInput(referralHint) }, [referralHint])
-
- useEffect(() => {
-  try {
-   const feed = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(100))
-   return onSnapshot(feed, snapshot => {
-    setRemote(snapshot.docs.map(item => { const data = item.data(); return { ...data, id: item.id, createdAt: data.createdAt?.toMillis?.() ?? Date.now(), liked: false } as Post }))
-   }, () => setRemote(null))
-  } catch { setRemote(null) }
- }, [])
-
- const remoteIds = useMemo(() => new Set((remote ?? []).map(post => post.id)), [remote])
- const allPosts = useMemo(() => {
-  const map = new Map<string, Post>()
-  for (const post of local.posts) map.set(post.id, post)
-  for (const post of remote ?? []) map.set(post.id, post)
-  return [...map.values()]
- }, [local.posts, remote])
 
  const posts = useMemo(() => {
   if (tab === 'friends') return allPosts.filter(post => post.uid && myFriendIds.includes(post.uid)).sort((a, b) => b.createdAt - a.createdAt)
@@ -155,10 +132,6 @@ export function Community() {
   else local.toggleLike(post.id)
  }
 
- const toggleSave = (postId: string) => {
-  const next = savedIds.includes(postId) ? savedIds.filter(id => id !== postId) : [...savedIds, postId]
-  setSavedIds(next); localStorage.setItem(SAVED_KEY, JSON.stringify(next))
- }
 
  const displayLikes = (post: Post) => remoteIds.has(post.id) ? post.likes : post.likes + (likedIds.includes(post.id) && !post.liked ? 1 : 0)
 
@@ -181,7 +154,7 @@ export function Community() {
 
   <section className="feed section community-layout">
    <div className="feed-main">
-    <Reveal><div className="feed-heading"><span className="kicker">The commons</span><h2>What learners are <em>saying.</em></h2><p>Wins, hot takes, questions, requests — if it helps someone learn, it belongs here.{remote && <span className="live-dot"> · Live</span>}</p></div></Reveal>
+    <Reveal><div className="feed-heading"><span className="kicker">The commons</span><h2>What learners are <em>saying.</em></h2><p>Wins, hot takes, questions, requests — if it helps someone learn, it belongs here.{connected && <span className="live-dot"> · Live</span>}</p></div></Reveal>
 
     <div className="feed-tabs">
      <button className={tab === 'friends' ? 'on' : ''} onClick={() => setTab('friends')}><Users size={14}/> Friends</button>
@@ -208,7 +181,7 @@ export function Community() {
        <button className={liked ? 'liked' : ''} onClick={() => toggleLike(post)} aria-label="Like post"><Heart/></button>
        <button aria-label="Comment" onClick={() => setExpandedId(expandedId === post.id ? null : post.id)}><MessageCircle/></button>
        <div className="share-wrap"><button onClick={() => setShareMenuId(shareMenuId === post.id ? null : post.id)} aria-label="Share post"><Send/></button>{shareMenuId === post.id && <div className="share-popover"><ShareRow url={`${window.location.origin}/community`} text={`"${post.text.slice(0, 180)}" — ${post.name} on FCA Commons`}/></div>}</div>
-       <button className={`ig-save ${saved ? 'on' : ''}`} onClick={() => toggleSave(post.id)} aria-label="Save post"><Bookmark/></button>
+       <button className={`ig-save ${saved ? 'on' : ''}`} onClick={() => toggleSavedPost(post.id)} aria-label="Save post"><Bookmark/></button>
       </div>
       <div className="ig-post-likes">{displayLikes(post).toLocaleString()} likes</div>
       <p className="ig-post-caption"><b>{post.handle}</b> {post.text}</p>
