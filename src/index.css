@@ -362,7 +362,17 @@ body{padding-bottom:60px}
 .fx-spotlight:before{content:"";position:absolute;inset:0;border-radius:inherit;opacity:0;transition:opacity .4s;background:radial-gradient(320px circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.07),transparent 60%);pointer-events:none;z-index:1}
 .fx-spotlight:hover:before{opacity:1}
 /* Premium hero */
-.hero-min{position:relative;min-height:86vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:90px 22px 50px;overflow:hidden}
+.hero-min{position:relative;min-height:86vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:90px 22px 50px;overflow:hidden;
+ background-image:
+  radial-gradient(58% 48% at 50% 0%,color-mix(in srgb,var(--primary-600),transparent 76%),transparent 72%),
+  radial-gradient(38% 32% at 84% 12%,color-mix(in srgb,var(--accent),transparent 92%),transparent 70%),
+  radial-gradient(34% 30% at 10% 22%,color-mix(in srgb,var(--primary-300),transparent 88%),transparent 70%),
+  radial-gradient(color-mix(in srgb,var(--text),transparent 35%) .6px,transparent 1.2px),
+  linear-gradient(180deg,var(--bg-0) 0%,var(--bg-1) 60%,var(--bg-0) 100%);
+ background-repeat:no-repeat,no-repeat,no-repeat,repeat,no-repeat;
+ background-size:100% 100%,100% 100%,100% 100%,44px 44px,100% 100%;
+ background-position:center,center,center,0 0,center}
+.hero-min:before{content:"";position:absolute;inset:0;opacity:.045;mix-blend-mode:overlay;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 .aurora{position:absolute;inset:-20% -10%;background:radial-gradient(42% 34% at 50% 14%,rgba(89,82,244,.15),transparent 70%),radial-gradient(28% 24% at 66% 28%,rgba(169,147,248,.07),transparent 70%);filter:blur(44px);animation:aurora 16s ease-in-out infinite alternate;pointer-events:none}
 @keyframes aurora{to{transform:translate(5%,3%) scale(1.07)}}
 .eyebrow.center,.kicker.center{justify-content:center}
@@ -1134,3 +1144,29 @@ tr:hover .admin-thumb img{transform:scale(1.15)}
 /* ---- Admin: achievement sticker thumbnail ---- */
 .achievement-sticker-thumb{overflow:hidden}
 .achievement-sticker-thumb img{width:100%;height:100%;object-fit:cover}
+
+/* ---- Home: ranked course showcase (Top-3 style) ---- */
+.rank-course-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:8px}
+.rank-course-card{position:relative;display:block;text-decoration:none;color:inherit}
+.rank-course-number{position:absolute;left:-6px;top:50%;transform:translateY(-50%);font:800 clamp(4.5rem,9vw,7rem)/1 var(--font-display);letter-spacing:-.04em;color:transparent;-webkit-text-stroke:1.5px color-mix(in srgb,var(--text),transparent 78%);z-index:0;user-select:none;pointer-events:none}
+.rank-course-media{position:relative;z-index:1;aspect-ratio:16/11;border-radius:18px;overflow:hidden;background:var(--bg-1);border:1px solid var(--border);margin-left:38px;box-shadow:0 26px 55px rgba(0,0,0,.35);transition:transform .4s var(--ease),box-shadow .4s var(--ease)}
+.rank-course-card:hover .rank-course-media{transform:translateY(-5px);box-shadow:0 34px 65px rgba(0,0,0,.45)}
+.rank-course-media img{width:100%;height:100%;object-fit:cover}
+.rank-course-fallback{width:100%;height:100%;display:flex;align-items:flex-end;padding:16px;background:radial-gradient(120% 100% at 50% 100%,color-mix(in srgb,var(--course-color),transparent 55%),transparent 60%),linear-gradient(160deg,#1A1A1E,#0E0E10)}
+.rank-course-fallback span{font:600 11px var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+.rank-course-badge{position:absolute;left:52px;bottom:14px;z-index:2;display:inline-flex;align-items:center;gap:6px;padding:6px 13px;border-radius:999px;background:rgba(10,10,14,.62);backdrop-filter:blur(8px);color:#fff;font:600 11.5px var(--font-mono);letter-spacing:.02em;border:1px solid rgba(255,255,255,.12)}
+.rank-course-badge svg{width:11px;color:var(--accent)}
+
+.more-courses-heading{font:700 20px var(--font-display);letter-spacing:-.015em;margin:60px 0 20px}
+.mini-course-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.mini-course-card{position:relative;display:block;aspect-ratio:16/11;border-radius:14px;overflow:hidden;background:var(--bg-1);border:1px solid var(--border);text-decoration:none;transition:transform .3s var(--ease)}
+.mini-course-card:hover{transform:translateY(-3px)}
+.mini-course-card img{width:100%;height:100%;object-fit:cover}
+.mini-course-card .rank-course-badge{left:12px}
+
+@media(max-width:800px){
+.rank-course-grid,.mini-course-grid{grid-template-columns:1fr}
+.rank-course-number{font-size:4rem;left:-2px}
+.rank-course-media{margin-left:24px}
+.rank-course-badge{left:30px}
+}
