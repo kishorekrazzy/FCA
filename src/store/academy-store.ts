@@ -33,6 +33,8 @@ export type AcademyState = {
   activityLog: Record<string, number>
   claimedChallenges: string[]
   dailyReward: DailyReward
+  leaderboardVisible: boolean
+  setLeaderboardVisible: (visible: boolean) => void
   enroll: (course: string) => void
   complete: (courseSlug: string, lesson: string, xp: number) => void
   toggleReader: () => void
@@ -58,6 +60,8 @@ export const useAcademyStore = create<AcademyState>()(persist((set, get) => ({
   activityLog: {},
   claimedChallenges: [],
   dailyReward: { lastClaimedDate: null, streak: 0 },
+  leaderboardVisible: true,
+  setLeaderboardVisible: (visible) => set({ leaderboardVisible: visible }),
   enroll: (course) => set((state) => ({ enrolled: state.enrolled.includes(course) ? state.enrolled : [...state.enrolled, course] })),
   complete: (courseSlug, lesson, xp) => set((state) => {
     if (state.completed.includes(lesson)) return state
@@ -114,13 +118,5 @@ export const useAcademyStore = create<AcademyState>()(persist((set, get) => ({
     return { xp: state.xp + dailyRewardAmount(streak), dailyReward: { lastClaimedDate: today, streak } }
   }),
 }), { name: 'academy-progress' }))
-
-type CompletionLike = { completed: string[] }
-
-export const achievementRules = [
-  { key: 'first-light', icon: '✦', title: 'First light', body: 'Complete your first lesson.', unlocked: (state: CompletionLike) => state.completed.length >= 1 },
-  { key: 'collector', icon: '◈', title: 'Collector', body: 'Complete five lessons.', unlocked: (state: CompletionLike) => state.completed.length >= 5 },
-  { key: 'full-orbit', icon: '◉', title: 'Full orbit', body: 'Finish an entire course.', unlocked: (state: CompletionLike) => getPublishedCourses().some((course) => allLessons(course).length > 0 && allLessons(course).every((lesson) => state.completed.includes(lesson.slug))) },
-]
 
 export const countCertificates = (completed: string[]) => getPublishedCourses().filter((course) => { const lessons = allLessons(course); return lessons.length > 0 && lessons.every((lesson) => completed.includes(lesson.slug)) }).length

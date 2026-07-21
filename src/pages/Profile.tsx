@@ -4,13 +4,14 @@ import { doc, onSnapshot } from 'firebase/firestore'
 import { Award, Check, Clock, Flame, MessageSquare, Sparkles, UserPlus, Users, X } from 'lucide-react'
 import { db } from '../lib/firebase'
 import { useAllCoursesAdmin } from '../data/catalog'
-import { achievementRules, countCertificates, levelFor } from '../store/academy-store'
+import { countCertificates, levelFor } from '../store/academy-store'
 import { useAuthStore } from '../store/auth-store'
 import { acceptFriendRequest, declineFriendRequest, sendFriendRequest, useConnections, useFriendState } from '../store/connections-store'
 import { useRemoteUsers } from '../components/admin/useAdminData'
 import { allLessons } from '../types'
 import { CourseArt, ProgressBar } from '../components/ui/Course'
 import { ShareRow } from '../components/ui/ShareRow'
+import { AchievementGrid } from '../components/ui/Achievements'
 import { Reveal } from '../components/fx'
 
 type ProfileUser = { displayName?: string; photoURL?: string; xp?: number; streak?: number; completed?: string[]; enrolled?: string[]; publicId?: string }
@@ -53,7 +54,7 @@ export function Profile() {
   </section></Reveal>
   <Reveal delay={40}><div className="profile-share"><span>Share this profile</span><ShareRow url={profileUrl} text={`Check out ${user.displayName ?? 'this learner'}'s progress on Future Creators Academy:`}/></div></Reveal>
   <Reveal delay={80}><section className="profile-stats"><article><Sparkles/><strong>{xp.toLocaleString()}</strong><span>total IQ</span></article><article><Flame/><strong>{user.streak ?? 0}</strong><span>day streak</span></article><article><Award/><strong>{certificates}</strong><span>certificates</span></article></section></Reveal>
-  <Reveal delay={140}><section className="profile-section"><h2>Achievement shelf</h2><div className="achievements-grid">{achievementRules.map((rule) => <article className={`achievement ${rule.unlocked({ completed }) ? 'unlocked' : ''}`} key={rule.key}><span>{rule.icon}</span><h3>{rule.title}</h3><p>{rule.body}</p></article>)}</div></section></Reveal>
+  <Reveal delay={140}><section className="profile-section"><h2>Achievement shelf</h2><AchievementGrid stats={{ completed, streak: user.streak ?? 0, xp, certificates }}/></section></Reveal>
   <Reveal delay={180}><section className="profile-section"><h2><Users size={18}/> Friends {friendIds.length > 0 && <span className="friend-count">{friendIds.length}</span>}</h2>{friendProfiles.length ? <div className="friends-grid">{friendProfiles.map((friend) => <Link to={`/profile/${friend.id}`} className="friend-chip" key={friend.id} title={friend.displayName}>{friend.photoURL ? <img src={friend.photoURL} alt="" referrerPolicy="no-referrer"/> : (friend.displayName ?? '?').slice(0, 2).toUpperCase()}</Link>)}</div> : <p className="admin-empty">No connections yet.</p>}</section></Reveal>
   <Reveal delay={220}><section className="profile-section"><h2>Courses in progress</h2>{enrolledCourses.length ? <div className="continue-list">{enrolledCourses.map((course) => <article key={course.slug}><CourseArt course={course}/><div><span className="kicker">{course.category}</span><h3>{course.title}</h3><p>{progressFor(course)}% complete</p><ProgressBar value={progressFor(course)}/></div><Link className="button ghost" to={`/academy/${course.slug}`}>View course</Link></article>)}</div> : <p className="admin-empty">No courses started yet.</p>}</section></Reveal>
  </main>

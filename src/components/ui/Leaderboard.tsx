@@ -6,7 +6,9 @@ const initials = (user: RemoteUser) => (user.displayName ?? user.email ?? '?').s
 
 export function useLeaderboard(limit = 10): RemoteUser[] {
  const { users } = useRemoteUsers()
- return (users ?? []).filter((user) => (user.xp ?? 0) > 0).sort((a, b) => (b.xp ?? 0) - (a.xp ?? 0)).slice(0, limit)
+ // Opted-out learners still earn IQ and keep their rank for personal stats — they
+ // just don't appear in this public list.
+ return (users ?? []).filter((user) => (user.xp ?? 0) > 0 && user.leaderboardVisible !== false).sort((a, b) => (b.xp ?? 0) - (a.xp ?? 0)).slice(0, limit)
 }
 
 export function LeaderboardRow({ user, rank }: { user: RemoteUser; rank: number }) {

@@ -14,6 +14,7 @@ export type RemoteUser = {
  lastActive?: string
  joinedAt?: number
  publicId?: string
+ leaderboardVisible?: boolean
 }
 
 export type RemotePost = {

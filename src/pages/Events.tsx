@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Check, Gift, Trophy } from 'lucide-react'
+import { ArrowRight, Check, Gift, Medal, Trophy } from 'lucide-react'
 import { Reveal } from '../components/fx'
 import { ProgressBar } from '../components/ui/Course'
 import { LeaderSpotlight } from '../components/ui/Leaderboard'
@@ -42,19 +42,34 @@ function EventCard({ challenge, signedIn, state, onClaim }: { challenge: Challen
  </article>
 }
 
+function LeaderboardEntryCard() {
+ return <Link to="/leaderboard" className="event-card leaderboard-entry-card">
+  <div className="event-card-head"><span className="event-icon"><Medal size={20}/></span><div><h3>Leaderboard</h3><span className="event-status live">See everyone</span></div></div>
+  <p className="event-desc">Every learner who's earned IQ, ranked from the top — see exactly where you stand.</p>
+  <span className="button ghost sm">View full leaderboard <ArrowRight size={13}/></span>
+ </Link>
+}
+
 export function Events() {
  const user = useAuthStore((state) => state.user)
  const state = useAcademyStore()
  const challenges = useChallenges()
  const now = Date.now()
- const sorted = [...challenges].sort((a, b) => {
-  const rank = (challenge: Challenge) => statusOf(challenge, now) === 'live' ? 0 : statusOf(challenge, now) === 'upcoming' ? 1 : 2
+ const activeAndUpcoming = challenges.filter((challenge) => statusOf(challenge, now) !== 'ended').sort((a, b) => {
+  const rank = (challenge: Challenge) => statusOf(challenge, now) === 'live' ? 0 : 1
   return rank(a) - rank(b) || a.startAt - b.startAt
  })
+ const past = challenges.filter((challenge) => statusOf(challenge, now) === 'ended').sort((a, b) => b.endAt - a.endAt)
 
  return <main className="events-page page">
   <div className="events-top"><Reveal><span className="kicker"><Trophy size={13}/> Gamified</span><h1>Earn IQ through <em>events.</em></h1><p>Time-boxed challenges and one-off events — some track your progress automatically, others just need your word.</p></Reveal><Reveal delay={80}><LeaderSpotlight/></Reveal></div>
-  {!sorted.length && <div className="empty"><p>No events yet — check back soon.</p></div>}
-  <div className="events-grid">{sorted.map((challenge, index) => <Reveal delay={index * 60} key={challenge.id}><EventCard challenge={challenge} signedIn={!!user} state={state} onClaim={state.claimChallenge}/></Reveal>)}</div>
+  {!activeAndUpcoming.length && !past.length && <div className="empty"><p>No events yet — check back soon.</p></div>}
+  <div className="events-grid">
+   <Reveal><LeaderboardEntryCard/></Reveal>
+   {activeAndUpcoming.map((challenge, index) => <Reveal delay={(index + 1) * 60} key={challenge.id}><EventCard challenge={challenge} signedIn={!!user} state={state} onClaim={state.claimChallenge}/></Reveal>)}
+  </div>
+  {!!past.length && <section className="events-past"><div className="section-heading"><div><span className="kicker">Archive</span><h2>Past <em>events.</em></h2></div></div>
+   <div className="events-grid">{past.map((challenge, index) => <Reveal delay={index * 60} key={challenge.id}><EventCard challenge={challenge} signedIn={!!user} state={state} onClaim={state.claimChallenge}/></Reveal>)}</div>
+  </section>}
  </main>
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
-import { Award, BookOpen, LayoutGrid, Lock, Map, MessagesSquare, ShieldAlert, Sparkles, Trophy, Users } from 'lucide-react'
+import { Award, BookOpen, LayoutGrid, Lock, Map, MessagesSquare, Medal, ShieldAlert, Sparkles, Trophy, Users } from 'lucide-react'
 import { ADMIN_EMAIL, useAdminStore } from '../../store/admin-store'
 import { useAuthStore } from '../../store/auth-store'
 
@@ -32,6 +32,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     <NavLink to="/admin/community"><MessagesSquare/> Community</NavLink>
     <NavLink to="/admin/paths"><Map/> Learning paths</NavLink>
     <NavLink to="/admin/challenges"><Trophy/> Events</NavLink>
+    <NavLink to="/admin/achievements"><Medal/> Achievements</NavLink>
    </nav>
    <div className="admin-sidebar-foot"><Link to="/" className="text-link">View site</Link><button className="text-link" onClick={lock}><Lock size={13}/> Lock</button></div>
   </aside>
