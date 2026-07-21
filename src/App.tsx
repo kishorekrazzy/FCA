@@ -23,6 +23,8 @@ import { ensurePublicId } from './store/connections-store'
 import { initPathsSync } from './store/paths-store'
 import { initChallengesSync } from './store/challenges-store'
 import { initAchievementsSync } from './store/achievements-store'
+import { initBannersSync } from './store/banners-store'
+import { initSiteSettingsSync } from './store/site-settings-store'
 import { AdminGate, AdminShell } from './components/admin/AdminShell'
 import { AdminOverview } from './pages/admin/AdminOverview'
 import { AdminCourses } from './pages/admin/AdminCourses'
@@ -34,6 +36,7 @@ import { AdminCommunity } from './pages/admin/AdminCommunity'
 import { AdminPaths } from './pages/admin/AdminPaths'
 import { AdminChallenges } from './pages/admin/AdminChallenges'
 import { AdminAchievements } from './pages/admin/AdminAchievements'
+import { AdminBanners } from './pages/admin/AdminBanners'
 import './index.css'
 
 function useProgressSync() {
@@ -132,6 +135,7 @@ function Shell() {
    <Route path="/admin/paths" element={<Admin><AdminPaths/></Admin>}/>
    <Route path="/admin/challenges" element={<Admin><AdminChallenges/></Admin>}/>
    <Route path="/admin/achievements" element={<Admin><AdminAchievements/></Admin>}/>
+   <Route path="/admin/banners" element={<Admin><AdminBanners/></Admin>}/>
    <Route path="*" element={<NotFound/>}/>
   </Routes>
   {!bare && <Footer/>}
@@ -141,7 +145,7 @@ function Shell() {
 
 function AuthAndSync() {
  useEffect(() => watchAuth(user => useAuthStore.getState().setUser(user)), [])
- useEffect(() => { initCatalogSync(); initReviewsSync(); initPathsSync(); initChallengesSync(); initAchievementsSync() }, [])
+ useEffect(() => { initCatalogSync(); initReviewsSync(); initPathsSync(); initChallengesSync(); initAchievementsSync(); initBannersSync(); initSiteSettingsSync() }, [])
  useProgressSync()
  return null
 }

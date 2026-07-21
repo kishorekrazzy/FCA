@@ -2,6 +2,8 @@ import { ArrowRight, Play, Sparkles, Star } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useCourses } from '../data/catalog'
 import { BlurText, CountUp, Magnetic, Marquee, Reveal } from '../components/fx'
+import { BannerCarousel } from '../components/ui/BannerCarousel'
+import { useHeroImageUrl } from '../store/site-settings-store'
 import type { Course } from '../types'
 
 const topics = ['Systems Thinking', 'Creative Direction', 'Research Rituals', 'Prototyping', 'Decision Design', 'Taste Calibration', 'Field Notes', 'Leverage']
@@ -25,8 +27,9 @@ function MiniCourseCard({ course }: { course: Course }) {
  </Link>
 }
 
-export function Home() { const courses = useCourses(); return <main>
- <section className="hero-min"><div className="aurora"/><Reveal><span className="eyebrow center"><Sparkles/> A new kind of school</span></Reveal><h1 className="hero-title"><BlurText text="Learn the"/><br/><em><BlurText text="uncommon" startDelay={160}/></em> <BlurText text="way." startDelay={260}/></h1><Reveal delay={350}><p className="hero-sub">Short, exceptional courses for the curious. Build better instincts, collect proof of practice, and make more of what matters.</p></Reveal><Reveal delay={450}><div className="hero-ctas"><Magnetic><Link className="button primary lg" to="/academy">Explore the academy <ArrowRight/></Link></Magnetic><Link className="button ghost lg" to="/events">See how it works</Link></div></Reveal><Reveal delay={600}><span className="hero-meta">Scroll — the practice begins below</span></Reveal></section>
+export function Home() { const courses = useCourses(); const heroImageUrl = useHeroImageUrl(); return <main>
+ <section className={`hero-min ${heroImageUrl ? 'has-image' : ''}`} style={heroImageUrl ? { backgroundImage: `url(${heroImageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}><div className="aurora"/><Reveal><span className="eyebrow center"><Sparkles/> A new kind of school</span></Reveal><h1 className="hero-title"><BlurText text="Learn the"/><br/><em><BlurText text="uncommon" startDelay={160}/></em> <BlurText text="way." startDelay={260}/></h1><Reveal delay={350}><p className="hero-sub">Short, exceptional courses for the curious. Build better instincts, collect proof of practice, and make more of what matters.</p></Reveal><Reveal delay={450}><div className="hero-ctas"><Magnetic><Link className="button primary lg" to="/academy">Explore the academy <ArrowRight/></Link></Magnetic><Link className="button ghost lg" to="/events">See how it works</Link></div></Reveal><Reveal delay={600}><span className="hero-meta">Scroll — the practice begins below</span></Reveal></section>
+ <Reveal><div className="section banner-section"><BannerCarousel placement="home"/></div></Reveal>
  <Marquee items={topics}/>
  <section className="stats-min"><Reveal><div><strong><CountUp to={500}/><b>+</b></strong><p>precise lessons</p></div></Reveal><Reveal delay={80}><div><strong><CountUp to={12}/></strong><p>learning tracks</p></div></Reveal><Reveal delay={160}><div><strong>4.9<b>/5</b></strong><p>learner rating</p></div></Reveal><Reveal delay={240}><div><strong><CountUp to={12480}/><b>+</b></strong><p>thoughtful learners</p></div></Reveal></section>
  <section className="section featured"><div className="section-heading"><Reveal><div><span className="kicker">Start somewhere</span><h2>Courses with <em>pull.</em></h2></div></Reveal><Link to="/academy" className="text-link">View all courses <ArrowRight/></Link></div>

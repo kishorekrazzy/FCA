@@ -381,6 +381,8 @@ body{padding-bottom:60px}
 .hero-ctas{position:relative;display:flex;gap:12px;margin-top:38px;justify-content:center;flex-wrap:wrap}
 .button.lg{padding:16px 26px;font-size:14px;border-radius:999px}
 .hero-meta{position:relative;display:block;margin-top:76px;font:500 10px var(--font-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--text-3)}
+.hero-min.has-image:after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(5,5,10,.4) 0%,rgba(5,5,10,.55) 55%,var(--bg-0) 100%)}
+.hero-min>*{position:relative;z-index:2}
 /* Stats */
 .stats-min{max-width:1180px;margin:0 auto;padding:64px 40px;display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
 .stats-min strong{font:700 clamp(1.9rem,3.2vw,2.9rem)/1 var(--font-display);letter-spacing:-.04em}
@@ -1169,4 +1171,33 @@ tr:hover .admin-thumb img{transform:scale(1.15)}
 .rank-course-number{font-size:4rem;left:-2px}
 .rank-course-media{margin-left:24px}
 .rank-course-badge{left:30px}
+}
+
+/* ---- Banner carousel (Home + Academy) ---- */
+.banner-section{max-width:1180px;margin:0 auto;padding:36px 40px 0}
+.banner-carousel{position:relative;border-radius:20px;overflow:hidden;border:1px solid var(--border);box-shadow:0 24px 60px rgba(0,0,0,.3)}
+.banner-slide{position:relative;display:block;aspect-ratio:21/9;background:var(--bg-1)}
+.banner-slide img{width:100%;height:100%;object-fit:cover;display:block}
+.banner-title{position:absolute;left:28px;bottom:22px;z-index:1;font:700 clamp(18px,2.4vw,30px) var(--font-display);letter-spacing:-.02em;color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.6);max-width:70%}
+.banner-slide:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(5,5,10,.72) 100%);pointer-events:none}
+.banner-dots{position:absolute;left:0;right:0;bottom:14px;display:flex;justify-content:center;gap:7px;z-index:2}
+.banner-dots button{width:7px;height:7px;border-radius:99px;border:0;padding:0;background:rgba(255,255,255,.35);transition:width .4s var(--ease),background .3s}
+.banner-dots button.on{width:22px;background:#fff}
+
+/* ---- Admin: hero image + banner grid ---- */
+.hero-thumb-preview,.banner-thumb-preview{aspect-ratio:21/9;height:auto}
+.banner-section-head{margin:32px 0 16px}
+.banner-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.banner-admin-card{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--bg-1)}
+.banner-admin-thumb{aspect-ratio:21/9;background:var(--bg-inset);display:grid;place-items:center;color:var(--text-3)}
+.banner-admin-thumb img{width:100%;height:100%;object-fit:cover}
+.banner-admin-body{padding:14px 16px}
+.banner-admin-body b{display:block;margin:6px 0 2px;font-size:14px}
+.banner-placement-tag{display:inline-block;font:600 10px var(--font-mono);letter-spacing:.04em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:var(--bg-inset);color:var(--text-3)}
+.banner-placement-tag.home{color:var(--primary-300);background:color-mix(in srgb,var(--primary-500),transparent 85%)}
+.banner-placement-tag.academy{color:var(--accent);background:color-mix(in srgb,var(--accent),transparent 88%)}
+
+@media(max-width:800px){
+.banner-section{padding:22px 18px 0}
+.banner-title{left:16px;bottom:14px;max-width:85%}
 }
