@@ -15,6 +15,7 @@ export type RemoteUser = {
  joinedAt?: number
  publicId?: string
  leaderboardVisible?: boolean
+ equippedFlair?: string
 }
 
 export type RemotePost = {

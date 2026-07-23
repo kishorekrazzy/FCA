@@ -15,8 +15,8 @@ export function LeaderboardRow({ user, rank }: { user: RemoteUser; rank: number 
  return <Link to={`/profile/${user.id}`} className={`leaderboard-row rank-${rank <= 3 ? rank : 'rest'}`}>
   <span className="leaderboard-rank">{rank}</span>
   <span className="leaderboard-avatar">{user.photoURL ? <img src={user.photoURL} alt="" referrerPolicy="no-referrer"/> : initials(user)}</span>
-  <span className="leaderboard-name">{user.displayName ?? 'FCA Learner'}</span>
-  <span className="leaderboard-xp">+{(user.xp ?? 0).toLocaleString()} IQ <Sparkles size={13}/></span>
+  <span className="leaderboard-name">{user.displayName ?? 'FCA Learner'} {user.equippedFlair && <span className="profile-flair">{user.equippedFlair}</span>}</span>
+  <span className="leaderboard-xp"><img className="mini-icon" src="/icon-xp.svg" alt=""/> +{(user.xp ?? 0).toLocaleString()} IQ</span>
  </Link>
 }
 
@@ -36,7 +36,7 @@ export function LeaderSpotlight() {
   <span className="leader-spotlight-row">
    <span className="leaderboard-avatar">{leader.photoURL ? <img src={leader.photoURL} alt="" referrerPolicy="no-referrer"/> : initials(leader)}</span>
    <span className="leader-spotlight-name">{leader.displayName ?? 'FCA Learner'}</span>
-   <span className="leader-spotlight-xp">{(leader.xp ?? 0).toLocaleString()} IQ</span>
+   <span className="leader-spotlight-xp"><img className="mini-icon" src="/icon-xp.svg" alt=""/> {(leader.xp ?? 0).toLocaleString()} IQ</span>
   </span>
  </Link>
 }

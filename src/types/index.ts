@@ -70,3 +70,44 @@ export const emptyLesson = (): Lesson => ({
 })
 
 export const slugify = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+
+/** Books are a deliberately lighter-weight sibling of Courses — no modules wrapper
+ * (chapters are a flat list), no certificate/exam fields, IQ-only rewards. Chapters
+ * can be read in any order, so there's no per-chapter locking logic anywhere. */
+export interface Chapter {
+  slug: string
+  title: string
+  duration: string
+  xp: number
+  eyebrow: string
+  lead: string
+  blocks?: ContentBlock[]
+  thumbnail?: string
+}
+
+export interface Book {
+  slug: string
+  title: string
+  subtitle: string
+  description: string
+  category: string
+  difficulty: Difficulty
+  duration: string
+  chapters: Chapter[]
+  skills: string[]
+  color: string
+  tagline?: string
+  thumbnail?: string
+  featured?: boolean
+  status?: 'draft' | 'published'
+  updatedAt?: number
+}
+
+export const emptyBook = (): Book => ({
+  slug: '', title: '', subtitle: '', description: '', category: 'Foundations', difficulty: 'Beginner', duration: '1h 00m',
+  chapters: [], skills: [], color: '#6871FA', tagline: '', featured: false, status: 'draft',
+})
+
+export const emptyChapter = (): Chapter => ({
+  slug: '', title: '', duration: '8 min', xp: 15, eyebrow: '', lead: '', blocks: [],
+})

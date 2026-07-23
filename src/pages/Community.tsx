@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Bookmark, BookOpen, Check, Clock, Flame, Heart, ImagePlus, MessageCircle, MessageSquare, MoreHorizontal, Send, Sparkles, TrendingUp, UserPlus, Users, X } from 'lucide-react'
 import { addDoc, collection, doc, increment, serverTimestamp, updateDoc } from 'firebase/firestore'
-import { Reveal } from '../components/fx'
+import { Marquee, Reveal } from '../components/fx'
+import { ScrollStagger } from '../components/fx/scroll'
+import { Crossfade, Pop } from '../components/fx/motion'
 import { db } from '../lib/firebase'
 import { useAuthStore } from '../store/auth-store'
 import { useAcademyStore } from '../store/academy-store'
@@ -19,22 +21,16 @@ const Xx = () => <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.7 3H2
 const In = () => <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.1c.5-1 1.8-2 3.7-2 4 0 4.7 2.6 4.7 6V21h-4v-5.5c0-1.3 0-3-1.9-3s-2.2 1.4-2.2 2.9V21H9z"/></svg>
 const Yt = () => <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 7.2s-.2-1.6-.9-2.3c-.9-.9-1.9-.9-2.3-1C16.6 3.6 12 3.6 12 3.6s-4.6 0-7.8.3c-.4.1-1.4.1-2.3 1-.7.7-.9 2.3-.9 2.3S.8 9.1.8 11v1.8c0 1.9.2 3.8.2 3.8s.2 1.6.9 2.3c.9.9 2 .9 2.5 1 1.8.2 7.6.3 7.6.3s4.6 0 7.8-.3c.4-.1 1.4-.1 2.3-1 .7-.7.9-2.3.9-2.3s.2-1.9.2-3.8V11c0-1.9-.2-3.8-.2-3.8zM9.9 15.1V8.4l6.2 3.4-6.2 3.3z"/></svg>
 
-const pile = [
- { text: 'FEEDBACK LOOPS', x: '-5%', y: '-7%', r: -14, c: '#6871FA' },
- { text: 'TASTE CALIBRATION', x: '15%', y: '-9%', r: 9, c: '#A993F8' },
- { text: 'STREAKS, IQ & PROOF', x: '37%', y: '-11%', r: -6, c: '#FFD86B' },
- { text: 'SMALLEST TRUE TEST', x: '59%', y: '-8%', r: 12, c: '#CDC6FB' },
- { text: 'SHIP SMALL, SHIP OFTEN', x: '81%', y: '-10%', r: -17, c: '#6871FA' },
- { text: 'ASK BETTER QUESTIONS', x: '-8%', y: '26%', r: 13, c: '#FFD86B' },
- { text: 'MAPS BEFORE MOVES', x: '13%', y: '23%', r: -19, c: '#CDC6FB' },
- { text: 'FIELD NOTES & DAILY DRILLS', x: '36%', y: '27%', r: 7, c: '#5952F4' },
- { text: 'DECISION DESIGN', x: '60%', y: '24%', r: -9, c: '#A993F8' },
- { text: 'LEVERAGE OVER EFFORT', x: '82%', y: '27%', r: 15, c: '#FFD86B' },
- { text: 'EVIDENCE OVER OPINION', x: '-6%', y: '58%', r: -8, c: '#A993F8' },
- { text: 'PRACTICED, NOT WATCHED', x: '16%', y: '62%', r: 11, c: '#FFD86B' },
- { text: 'CERTIFICATES THAT VERIFY', x: '38%', y: '59%', r: -13, c: '#6871FA' },
- { text: 'BUILD TO LEARN', x: '61%', y: '63%', r: 6, c: '#CDC6FB' },
- { text: 'NOTICE MORE, REACT LESS', x: '82%', y: '60%', r: -11, c: '#5952F4' },
+const MARQUEE_WORDS = [
+ 'FEEDBACK LOOPS', 'TASTE CALIBRATION', 'STREAKS, IQ & PROOF', 'SMALLEST TRUE TEST', 'SHIP SMALL, SHIP OFTEN',
+ 'ASK BETTER QUESTIONS', 'MAPS BEFORE MOVES', 'FIELD NOTES & DAILY DRILLS', 'DECISION DESIGN', 'LEVERAGE OVER EFFORT',
+ 'EVIDENCE OVER OPINION', 'PRACTICED, NOT WATCHED', 'CERTIFICATES THAT VERIFY', 'BUILD TO LEARN', 'NOTICE MORE, REACT LESS',
+]
+
+const PROMPTS = [
+ { label: '🎉 Share a win', prefix: 'Just shipped: ' },
+ { label: '❓ Ask something', prefix: 'Question for the commons — ' },
+ { label: '📚 Recommend a course', prefix: 'If you want to get better at this, take ' },
 ]
 
 const LIKED_KEY = 'fca-liked'
@@ -147,29 +143,37 @@ export function Community() {
  const myUrl = me?.publicId ? `${window.location.origin}/community?ref=${me.publicId}` : window.location.origin
 
  return <main className="community">
-  <section className="community-hero">{pile.map((card, index) => <div className="pile-card" key={card.text} style={{ left: card.x, top: card.y, background: card.c, '--r': `${card.r}deg`, animationDelay: `${index * 55}ms` } as React.CSSProperties}>{card.text}</div>)}
-   <div className="quote-card"><p>IF YOU LEARN SOMETHING AND TELL NO ONE, THE IDEA STOPS WITH YOU.</p><span>Say it below ↓</span></div>
-   <div className="connect-pill"><span>Connect with us:</span><a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram"><Ig/></a><a href="https://x.com" target="_blank" rel="noreferrer" aria-label="X"><Xx/></a><a href="https://linkedin.com" target="_blank" rel="noreferrer" aria-label="LinkedIn"><In/></a><a href="https://youtube.com" target="_blank" rel="noreferrer" aria-label="YouTube"><Yt/></a></div>
+  <section className="community-top">
+   <Reveal><span className="kicker">The commons</span><h1>Where learners <em>show their work.</em></h1><p>Wins, hot takes, questions, requests — if it helps someone learn, it belongs here.{connected && <span className="live-dot"> · Live</span>}</p></Reveal>
+   <Reveal delay={80}><div className="community-pulse">
+    <div className="community-pulse-row">
+     <div className="pulse-stat"><Sparkles size={15}/><strong>{allPosts.length}</strong><span>posts</span></div>
+     <div className="pulse-stat"><Users size={15}/><strong>{directory?.length ?? 0}</strong><span>members</span></div>
+     <div className="pulse-stat"><UserPlus size={15}/><strong>{myFriendIds.length}</strong><span>friends</span></div>
+    </div>
+    <div className="connect-pill"><span>Connect:</span><a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram"><Ig/></a><a href="https://x.com" target="_blank" rel="noreferrer" aria-label="X"><Xx/></a><a href="https://linkedin.com" target="_blank" rel="noreferrer" aria-label="LinkedIn"><In/></a><a href="https://youtube.com" target="_blank" rel="noreferrer" aria-label="YouTube"><Yt/></a></div>
+   </div></Reveal>
   </section>
+
+  <Marquee items={MARQUEE_WORDS}/>
 
   <section className="feed section community-layout">
    <div className="feed-main">
-    <Reveal><div className="feed-heading"><span className="kicker">The commons</span><h2>What learners are <em>saying.</em></h2><p>Wins, hot takes, questions, requests — if it helps someone learn, it belongs here.{connected && <span className="live-dot"> · Live</span>}</p></div></Reveal>
-
     <div className="feed-tabs">
      <button className={tab === 'friends' ? 'on' : ''} onClick={() => setTab('friends')}><Users size={14}/> Friends</button>
      <button className={tab === 'new' ? 'on' : ''} onClick={() => setTab('new')}><Sparkles size={14}/> New</button>
      <button className={tab === 'trending' ? 'on' : ''} onClick={() => setTab('trending')}><TrendingUp size={14}/> Trending</button>
     </div>
 
-    <Reveal delay={80}><div className="composer"><span className="post-avatar" style={{ background: '#5952F4' }}>{user?.photoURL ? <img src={user.photoURL} alt="" referrerPolicy="no-referrer"/> : name.slice(0, 2).toUpperCase()}</span><div className="composer-main"><textarea value={draft} onChange={event => setDraft(event.target.value)} placeholder="Share a thought, a win, or a question…" rows={3} maxLength={420}/>
+    <Reveal><div className="composer"><span className="post-avatar" style={{ background: '#5952F4' }}>{user?.photoURL ? <img src={user.photoURL} alt="" referrerPolicy="no-referrer"/> : name.slice(0, 2).toUpperCase()}</span><div className="composer-main"><textarea value={draft} onChange={event => setDraft(event.target.value)} placeholder="Share a thought, a win, or a question…" rows={3} maxLength={420}/>
      {imageOpen && <div className="composer-image"><input value={imageUrl} onChange={event => setImageUrl(event.target.value)} placeholder="Paste an image URL (optional — a default photo is used if empty)"/><button onClick={() => { setImageOpen(false); setImageUrl('') }} aria-label="Remove image"><X/></button></div>}
      {coursePickerOpen && !attachedCourse && <div className="composer-course-picker">{courses.map(course => <button key={course.slug} onClick={() => { setAttachedCourse({ slug: course.slug, title: course.title }); setCoursePickerOpen(false) }}>{course.title}</button>)}</div>}
      {attachedCourse && <div className="composer-attached-course"><BookOpen size={14}/> {attachedCourse.title}<button onClick={() => setAttachedCourse(null)} aria-label="Remove course"><X size={13}/></button></div>}
+     {!draft && <div className="composer-prompts">{PROMPTS.map((prompt) => <button key={prompt.label} onClick={() => setDraft(prompt.prefix)}>{prompt.label}</button>)}</div>}
      <div className="composer-row"><div className="composer-left"><button className="composer-tool" onClick={() => setImageOpen(open => !open)} aria-label="Add image"><ImagePlus/></button><button className="composer-tool" onClick={() => setCoursePickerOpen(open => !open)} aria-label="Attach a course"><BookOpen/></button><small>{notice || `${user ? `Posting as ${name}` : 'Posting as guest'} · ${420 - draft.length} left`}</small></div><button className="button primary" onClick={publish} disabled={!draft.trim()}><Send/> Post</button></div></div></div></Reveal>
 
-    <div className="feed-list ig-list">{posts.map((post, index) => { const liked = likedIds.includes(post.id) || post.liked; const saved = savedIds.includes(post.id); const avatarNode = post.photo ? <img src={post.photo} alt="" referrerPolicy="no-referrer"/> : post.name.slice(0, 2).toUpperCase()
-     return <Reveal delay={Math.min(index, 5) * 60} key={post.id}><article className="ig-post">
+    <Crossfade id={tab}><ScrollStagger className="feed-list ig-list" stagger={0.05}>{posts.map((post) => { const liked = likedIds.includes(post.id) || post.liked; const saved = savedIds.includes(post.id); const avatarNode = post.photo ? <img src={post.photo} alt="" referrerPolicy="no-referrer"/> : post.name.slice(0, 2).toUpperCase()
+     return <article className="ig-post" key={post.id}>
       <header className="ig-post-head">
        {post.uid ? <Link to={`/profile/${post.uid}`} className="post-avatar" style={{ background: post.color }}>{avatarNode}</Link> : <span className="post-avatar" style={{ background: post.color }}>{avatarNode}</span>}
        <div className="ig-post-who">{post.uid ? <Link to={`/profile/${post.uid}`}><b>{post.handle}</b></Link> : <b>{post.handle}</b>}<span>{timeAgo(post.createdAt)} ago</span></div>
@@ -180,23 +184,23 @@ export function Community() {
       <div className={`ig-post-actions ${!post.image ? 'no-image' : ''}`}>
        <button className={liked ? 'liked' : ''} onClick={() => toggleLike(post)} aria-label="Like post"><Heart/></button>
        <button aria-label="Comment" onClick={() => setExpandedId(expandedId === post.id ? null : post.id)}><MessageCircle/></button>
-       <div className="share-wrap"><button onClick={() => setShareMenuId(shareMenuId === post.id ? null : post.id)} aria-label="Share post"><Send/></button>{shareMenuId === post.id && <div className="share-popover"><ShareRow url={`${window.location.origin}/community`} text={`"${post.text.slice(0, 180)}" — ${post.name} on FCA Commons`}/></div>}</div>
+       <div className="share-wrap"><button onClick={() => setShareMenuId(shareMenuId === post.id ? null : post.id)} aria-label="Share post"><Send/></button><Pop show={shareMenuId === post.id} className="share-popover"><ShareRow url={`${window.location.origin}/community`} text={`"${post.text.slice(0, 180)}" — ${post.name} on FCA Commons`}/></Pop></div>
        <button className={`ig-save ${saved ? 'on' : ''}`} onClick={() => toggleSavedPost(post.id)} aria-label="Save post"><Bookmark/></button>
       </div>
       <div className="ig-post-likes">{displayLikes(post).toLocaleString()} likes</div>
       <p className="ig-post-caption"><b>{post.handle}</b> {post.text}</p>
       {post.courseSlug && <Link to={`/academy/${post.courseSlug}`} className="post-course-chip"><BookOpen size={13}/> {post.courseTitle ?? 'View course'}</Link>}
       <button className="ig-post-comments" onClick={() => setExpandedId(expandedId === post.id ? null : post.id)}>{expandedId === post.id ? 'Hide comments' : post.replies > 0 ? `View all ${post.replies} comments` : 'Add a comment'}</button>
-      {expandedId === post.id && <PostComments postId={post.id} myUid={user?.uid} myName={name} myPhoto={user?.photoURL}/>}
+      <Pop show={expandedId === post.id}><PostComments postId={post.id} myUid={user?.uid} myName={name} myPhoto={user?.photoURL}/></Pop>
       <span className="ig-post-time">{timeAgo(post.createdAt).toUpperCase()} AGO</span>
-     </article></Reveal>
-    })}</div>
+     </article>
+    })}</ScrollStagger></Crossfade>
     {!posts.length && tab === 'friends' && <div className="empty"><p>{user ? 'Your friends haven\'t posted yet — invite some from the sidebar.' : 'Sign in and add friends to see their posts here.'}</p></div>}
     {!posts.length && tab !== 'friends' && <div className="empty"><p>Nobody's posted yet — be the first to share something above.</p></div>}
    </div>
 
    <aside className="feed-sidebar">
-    <Reveal><div className="sidebar-card id-card"><h3><Sparkles size={15}/> Your ID</h3>{user ? <><div className="id-value">{me?.publicId ?? 'Generating…'}</div><p className="id-hint">This is also your referral code — friends who redeem it become instant connections, and you both get +50 IQ.</p><ShareRow url={myUrl} text={`Join me on Future Creators Academy — use my code ${me?.publicId ?? ''} when you sign up:`}/></> : <p className="id-hint"><Link to="/auth/sign-in">Sign in</Link> to get your unique ID and start inviting friends.</p>}
+    <Reveal><div className="sidebar-card id-card"><h3><Sparkles size={15}/> Your ID</h3>{user && me?.publicId && <span className="id-card-glow" aria-hidden="true"/>}{user ? <><div className="id-value">{me?.publicId ?? 'Generating…'}</div><p className="id-hint">This is also your referral code — friends who redeem it become instant connections, and you both get +50 IQ.</p><ShareRow url={myUrl} text={`Join me on Future Creators Academy — use my code ${me?.publicId ?? ''} when you sign up:`}/></> : <p className="id-hint"><Link to="/auth/sign-in">Sign in</Link> to get your unique ID and start inviting friends.</p>}
      {user && <div className="redeem-row"><input value={redeemInput} onChange={event => { setRedeemInput(event.target.value); setRedeemStatus(null) }} placeholder="Redeem a friend's code"/><button className="button ghost sm" onClick={redeem} disabled={!redeemInput.trim() || redeemStatus === 'pending'}>Redeem</button></div>}
      {redeemStatus === 'ok' && <p className="redeem-status success">Connected! +50 IQ is on its way to both of you.</p>}
      {redeemStatus === 'self' && <p className="redeem-status error">That's your own code.</p>}

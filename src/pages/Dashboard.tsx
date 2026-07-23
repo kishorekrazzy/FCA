@@ -19,8 +19,8 @@ import type { Course } from '../types'
 
 const greeting = () => { const hour = new Date().getHours(); return hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening' }
 
-function StatChip({ value, label, bar }: { value: React.ReactNode; label: string; bar?: number }) {
- return <div className="stat-chip"><strong>{value}</strong><span>{label}</span>{typeof bar === 'number' && <div className="stat-chip-bar"><span style={{ width: `${bar}%` }}/></div>}</div>
+function StatChip({ value, label, bar, icon }: { value: React.ReactNode; label: string; bar?: number; icon?: string }) {
+ return <div className="stat-chip"><div className="stat-chip-value">{icon && <img className="mini-icon" src={icon} alt=""/>}<strong>{value}</strong></div><span>{label}</span>{typeof bar === 'number' && <div className="stat-chip-bar"><span style={{ width: `${bar}%` }}/></div>}</div>
 }
 
 function ActivityPanel({ xp, streak, activityLog }: { xp: number; streak: number; activityLog: Record<string, number> }) {
@@ -30,8 +30,8 @@ function ActivityPanel({ xp, streak, activityLog }: { xp: number; streak: number
    <div><span className="kicker">Activity</span><h2>Your practice, <em>visualized.</em></h2></div>
    <div className="dash-contrib-stats">
     <StatChip value={String(levelFor(xp)).padStart(2, '0')} label="level" bar={levelProgress(xp)}/>
-    <StatChip value={<CountUp to={xp}/>} label="IQ collected"/>
-    <StatChip value={streak} label="day streak"/>
+    <StatChip value={<CountUp to={xp}/>} label="IQ collected" icon="/icon-xp.svg"/>
+    <StatChip value={streak} label="day streak" icon="/icon-streak.svg"/>
     <StatChip value={bestDay} label="best day"/>
    </div>
   </div>
@@ -47,7 +47,7 @@ function DailyRewardCard({ dailyReward, onClaim }: { dailyReward: DailyReward; o
  const amount = dailyRewardAmount(previewStreak)
  return <section className="daily-reward">
   <div className="daily-reward-info"><Calendar/><div><h3>{claimedToday ? 'Come back tomorrow' : 'Daily reward ready'}</h3><p>{claimedToday ? `Claimed — day ${dailyReward.streak} of your streak.` : `Day ${previewStreak} of your streak — claim today's IQ before it resets.`}</p></div></div>
-  <button className="button primary sm" onClick={onClaim} disabled={claimedToday}>{claimedToday ? <><Check size={14}/> Claimed</> : <><Gift size={14}/> Claim +{amount} IQ</>}</button>
+  <button className="button primary sm" onClick={onClaim} disabled={claimedToday}>{claimedToday ? <><Check size={14}/> Claimed</> : <><Gift size={14}/> Claim +{amount} <img className="mini-icon" src="/icon-xp.svg" alt=""/> IQ</>}</button>
  </section>
 }
 
@@ -86,14 +86,14 @@ function WeeklyChallenges({ streak, activityLog, claimed, onClaim }: { streak: n
   const count = Object.entries(activityLog).filter(([day]) => day >= start && day <= end).reduce((sum, [, value]) => sum + value, 0)
   return Math.min(count, challenge.goalCount)
  }
- return <section className="dash-challenges"><div className="section-heading"><div><span className="kicker"><Trophy size={12}/> Time-boxed</span><h2>Active <em>events.</em></h2></div><Link className="link-button" to="/events">See all events</Link></div>
+ return <section className="dash-challenges"><div className="section-heading"><div><span className="kicker"><Trophy size={12}/> Time-boxed</span><h2>Active <em>challenges.</em></h2></div><Link className="link-button" to="/events">Open Playground</Link></div>
   <div className="challenges-grid">{active.map((challenge) => {
    const value = progressFor(challenge)
    const done = value >= challenge.goalCount
    const isClaimed = claimed.includes(challenge.id)
    return <article className={`challenge-card ${done ? 'done' : ''}`} key={challenge.id}>
     <span className="challenge-icon">{challenge.icon}</span>
-    <div className="challenge-body"><h3>{challenge.title}</h3><p>{challenge.description}</p><ProgressBar value={Math.round((value / challenge.goalCount) * 100)}/><span className="challenge-meta">{value}/{challenge.goalCount} {challenge.goalType === 'streak' ? 'day streak' : 'lessons'} · +{challenge.xpReward} IQ</span></div>
+    <div className="challenge-body"><h3>{challenge.title}</h3><p>{challenge.description}</p><ProgressBar value={Math.round((value / challenge.goalCount) * 100)}/><span className="challenge-meta">{value}/{challenge.goalCount} {challenge.goalType === 'streak' ? 'day streak' : 'lessons'} · +{challenge.xpReward} <img className="mini-icon" src="/icon-xp.svg" alt=""/> IQ</span></div>
     {isClaimed ? <span className="challenge-claimed"><Check size={14}/> Claimed</span> : <button className="button primary sm" disabled={!done} onClick={() => onClaim(challenge.id, challenge.xpReward)}><Gift size={14}/> Claim</button>}
    </article>
   })}</div>
@@ -104,7 +104,7 @@ function SavedPosts({ savedIds, onUnsave }: { savedIds: string[]; onUnsave: (id:
  const { posts } = useAllPosts()
  const saved = useMemo(() => posts.filter((post) => savedIds.includes(post.id)).sort((a, b) => b.createdAt - a.createdAt), [posts, savedIds])
  return <section className="side-panel saved-posts-panel">
-  <div className="side-panel-head"><h3><Bookmark size={14}/> Saved from Community</h3>{saved.length > 0 && <Link className="link-button" to="/community">View feed</Link>}</div>
+  <div className="side-panel-head"><h3><span className="section-icon-chip brand"><Bookmark size={14}/></span> Saved from Community</h3>{saved.length > 0 && <Link className="link-button" to="/community">View feed</Link>}</div>
   {!saved.length && <p className="admin-empty">Bookmark a post in the community feed and it'll show up here.</p>}
   <div className="saved-posts-list">{saved.slice(0, 6).map((post) => <article className="saved-post-card" key={post.id}>
    <span className="post-avatar sm" style={{ background: post.color }}>{post.photo ? <img src={post.photo} alt="" referrerPolicy="no-referrer"/> : post.name.slice(0, 2).toUpperCase()}</span>
@@ -118,7 +118,7 @@ function AchievementShelf({ stats, profileUid }: { stats: { completed: string[];
  const achievements = useAchievements()
  const unlocked = achievements.filter((achievement) => isAchievementUnlocked(achievement, stats))
  return <section className="side-panel">
-  <div className="side-panel-head"><h3><Award size={14}/> Achievements</h3>{profileUid && <Link className="link-button" to={`/profile/${profileUid}`}>View shelf</Link>}</div>
+  <div className="side-panel-head"><h3><span className="section-icon-chip premium"><Award size={14}/></span> Achievements</h3>{profileUid && <Link className="link-button" to={`/profile/${profileUid}`}>View shelf</Link>}</div>
   {!achievements.length && <p className="admin-empty">No achievements yet — check back soon.</p>}
   <div className="shelf-mini-row">{achievements.slice(0, 10).map((achievement) => { const isUnlocked = unlocked.some((item) => item.id === achievement.id); return <span className={`shelf-sticker ${isUnlocked ? 'unlocked' : ''}`} key={achievement.id} title={achievement.title}>{achievement.stickerUrl ? <img src={achievement.stickerUrl} alt=""/> : <Medal/>}</span> })}</div>
   {achievements.length > 0 && <span className="shelf-mini-count">{unlocked.length}/{achievements.length} unlocked</span>}
@@ -153,13 +153,13 @@ export function Dashboard() {
    <aside className="dash-col-side">
     {user && <SavedPosts savedIds={state.savedPostIds} onUnsave={state.toggleSavedPost}/>}
     <section className="side-panel">
-     <div className="side-panel-head"><h3><Trophy size={14}/> Leaderboard</h3><Link className="link-button" to="/leaderboard">View all</Link></div>
+     <div className="side-panel-head"><h3><span className="section-icon-chip premium"><Trophy size={14}/></span> Leaderboard</h3><Link className="link-button" to="/leaderboard">View all</Link></div>
      <Leaderboard limit={5}/>
      {user && <button className="leaderboard-visibility-toggle" onClick={() => state.setLeaderboardVisible(!state.leaderboardVisible)}>{state.leaderboardVisible ? <><Eye size={13}/> Visible on the public leaderboard</> : <><EyeOff size={13}/> Hidden from the public leaderboard</>} — <span>{state.leaderboardVisible ? 'hide me' : 'show me'}</span></button>}
     </section>
     <AchievementShelf stats={achievementStats} profileUid={user?.uid}/>
     <section className="side-panel">
-     <div className="side-panel-head"><h3><Flame size={14}/> Skill distribution</h3></div>
+     <div className="side-panel-head"><h3><span className="section-icon-chip brand"><Flame size={14}/></span> Skill distribution</h3></div>
      <SkillRadar completed={state.completed} courses={courses}/>
     </section>
    </aside>

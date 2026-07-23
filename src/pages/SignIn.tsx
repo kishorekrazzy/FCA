@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { BlurText, Magnetic, Reveal } from '../components/fx'
 import { signInWithGoogle } from '../lib/firebase'
 import { useAuthStore } from '../store/auth-store'
+import { useBanners } from '../store/banners-store'
 
 const slides = [
  { kicker: 'SYSTEMS', title: 'See the hidden structure.', body: 'Short lessons that change how you look at problems.', color: '#6871FA' },
@@ -16,12 +17,14 @@ export function SignIn() {
  const [slide, setSlide] = useState(0)
  const [error, setError] = useState('')
  const user = useAuthStore(state => state.user)
+ const loginImages = useBanners('login')
  const navigate = useNavigate()
  useEffect(() => { const timer = window.setInterval(() => setSlide(current => (current + 1) % slides.length), 4200); return () => window.clearInterval(timer) }, [])
  useEffect(() => { if (user) navigate('/dashboard') }, [user, navigate])
  const login = async () => { setError(''); try { await signInWithGoogle() } catch { setError('Sign-in was interrupted. Please try again.') } }
  return <main className="login-shell">
-  <aside className="login-slides">{slides.map((item, index) => <div key={item.kicker} className={`login-slide ${index === slide ? 'active' : ''}`} style={{ '--slide-color': item.color } as React.CSSProperties}><div className="slide-orb"/><i/><i/><div className="slide-copy"><span className="kicker">{item.kicker}</span><h2>{item.title}</h2><p>{item.body}</p></div></div>)}<Link className="slides-brand" to="/"><img src="/logo.svg" alt="Future Creators Academy"/></Link><div className="slide-dots">{slides.map((item, index) => <button key={item.kicker} className={index === slide ? 'on' : ''} onClick={() => setSlide(index)} aria-label={`Show slide ${index + 1}`}/>)}</div></aside>
+  <aside className="login-slides">{slides.map((item, index) => { const image = loginImages[index]?.imageUrl
+    return <div key={item.kicker} className={`login-slide ${index === slide ? 'active' : ''} ${image ? 'has-image' : ''}`} style={{ '--slide-color': item.color, backgroundImage: image ? `url(${image})` : undefined } as React.CSSProperties}>{!image && <><div className="slide-orb"/><i/><i/></>}<div className="slide-copy"><span className="kicker">{item.kicker}</span><h2>{item.title}</h2><p>{item.body}</p></div></div> })}<Link className="slides-brand" to="/"><img src="/logo.svg" alt="Future Creators Academy"/></Link><div className="slide-dots">{slides.map((item, index) => <button key={item.kicker} className={index === slide ? 'on' : ''} onClick={() => setSlide(index)} aria-label={`Show slide ${index + 1}`}/>)}</div></aside>
   <section className="login-panel"><Reveal><img className="login-logo" src="/logo.svg" alt=""/></Reveal><h1><BlurText text="Welcome back." startDelay={120}/></h1><Reveal delay={300}><p className="login-sub">Sign in to keep your IQ, streaks, and certificates in one place — on every device.</p></Reveal><Reveal delay={420}><Magnetic strength={0.15}><button className="google-btn" onClick={login}><GoogleG/> Continue with Google</button></Magnetic></Reveal><Reveal delay={520}><div className="login-divider"><span>or</span></div><Link className="button ghost full" to="/academy">Continue as guest</Link></Reveal>{error && <p className="login-error">{error}</p>}<Reveal delay={640}><p className="login-terms">By continuing, you agree to the FCA Terms and acknowledge the Privacy Policy.</p></Reveal></section>
  </main>
 }

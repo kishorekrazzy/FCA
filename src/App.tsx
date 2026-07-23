@@ -1,12 +1,16 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Link, Route, Routes, useLocation } from 'react-router-dom'
 import { Footer, MobileNav, TopNav } from './components/ui/Layout'
+import { PageTransition } from './components/fx/motion'
 import { Home } from './pages/Home'
 import { Catalog } from './pages/Catalog'
 import { CourseDetail } from './pages/CourseDetail'
 import { Lesson } from './pages/Lesson'
+import { Books } from './pages/Books'
+import { BookDetail } from './pages/BookDetail'
+import { Chapter } from './pages/Chapter'
 import { Dashboard } from './pages/Dashboard'
-import { Events } from './pages/Events'
+import { Playground } from './pages/Playground'
 import { LeaderboardPage } from './pages/LeaderboardPage'
 import { Certificate, VerifyCertificate } from './pages/Certificate'
 import { SignIn } from './pages/SignIn'
@@ -25,6 +29,8 @@ import { initChallengesSync } from './store/challenges-store'
 import { initAchievementsSync } from './store/achievements-store'
 import { initBannersSync } from './store/banners-store'
 import { initSiteSettingsSync } from './store/site-settings-store'
+import { initShopCouponsSync, initShopSync } from './store/shop-store'
+import { initBooksSync } from './store/book-store'
 import { AdminGate, AdminShell } from './components/admin/AdminShell'
 import { AdminOverview } from './pages/admin/AdminOverview'
 import { AdminCourses } from './pages/admin/AdminCourses'
@@ -38,6 +44,10 @@ import { AdminPaths } from './pages/admin/AdminPaths'
 import { AdminChallenges } from './pages/admin/AdminChallenges'
 import { AdminAchievements } from './pages/admin/AdminAchievements'
 import { AdminBanners } from './pages/admin/AdminBanners'
+import { AdminShop } from './pages/admin/AdminShop'
+import { AdminBooks } from './pages/admin/AdminBooks'
+import { AdminBookEditor } from './pages/admin/AdminBookEditor'
+import { AdminChapterEditor } from './pages/admin/AdminChapterEditor'
 import './index.css'
 
 function useProgressSync() {
@@ -54,6 +64,7 @@ function useProgressSync() {
    setDoc(ref, {
     completed: state.completed, enrolled: state.enrolled, xp: state.xp, streak: state.streak, streakFreezes: state.streakFreezes, lastActive: state.lastActive,
     reviews: state.reviews, activityLog: state.activityLog, claimedChallenges: state.claimedChallenges, dailyReward: state.dailyReward, leaderboardVisible: state.leaderboardVisible, examPassed: state.examPassed, savedPostIds: state.savedPostIds,
+    ownedItems: state.ownedItems, equippedFlair: state.equippedFlair, completedChapters: state.completedChapters,
     displayName: profile?.displayName ?? null, email: profile?.email ?? null, photoURL: profile?.photoURL ?? null,
     ...(publicId ? { publicId } : {}),
    }, { merge: true }).catch(() => {})
@@ -80,6 +91,9 @@ function useProgressSync() {
      leaderboardVisible: remote.leaderboardVisible ?? state.leaderboardVisible,
      examPassed: { ...(remote.examPassed ?? {}), ...state.examPassed },
      savedPostIds: [...new Set([...state.savedPostIds, ...(remote.savedPostIds ?? [])])],
+     ownedItems: [...new Set([...state.ownedItems, ...(remote.ownedItems ?? [])])],
+     equippedFlair: state.equippedFlair ?? remote.equippedFlair ?? null,
+     completedChapters: [...new Set([...state.completedChapters, ...(remote.completedChapters ?? [])])],
     })
    } else {
     setDoc(ref, { joinedAt: serverTimestamp() }, { merge: true }).catch(() => {})
@@ -110,20 +124,25 @@ function Admin({ children }: { children: React.ReactNode }) { return <AdminGate>
 function Shell() {
  const { pathname } = useLocation()
  const bare = pathname.startsWith('/auth') || pathname.startsWith('/admin')
+ const isHome = pathname === '/'
+ const isMessages = pathname === '/messages'
  return <>
   <ScrollToTop/>
-  {!bare && <TopNav/>}
-  <Routes>
+  {!bare && !isMessages && <TopNav/>}
+  <PageTransition><Routes>
    <Route path="/" element={<Home/>}/>
    <Route path="/academy" element={<Catalog/>}/>
    <Route path="/academy/:courseSlug" element={<CourseDetail/>}/>
    <Route path="/academy/:courseSlug/certificate" element={<Certificate/>}/>
    <Route path="/academy/:courseSlug/:lessonSlug" element={<Lesson/>}/>
+   <Route path="/books" element={<Books/>}/>
+   <Route path="/books/:bookSlug" element={<BookDetail/>}/>
+   <Route path="/books/:bookSlug/:chapterSlug" element={<Chapter/>}/>
    <Route path="/dashboard" element={<Dashboard/>}/>
    <Route path="/community" element={<Community/>}/>
    <Route path="/profile/:uid" element={<Profile/>}/>
    <Route path="/messages" element={<Messages/>}/>
-   <Route path="/events" element={<Events/>}/>
+   <Route path="/events" element={<Playground/>}/>
    <Route path="/leaderboard" element={<LeaderboardPage/>}/>
    <Route path="/certificates/:certId" element={<VerifyCertificate/>}/>
    <Route path="/auth/sign-in" element={<SignIn/>}/>
@@ -140,16 +159,21 @@ function Shell() {
    <Route path="/admin/challenges" element={<Admin><AdminChallenges/></Admin>}/>
    <Route path="/admin/achievements" element={<Admin><AdminAchievements/></Admin>}/>
    <Route path="/admin/banners" element={<Admin><AdminBanners/></Admin>}/>
+   <Route path="/admin/shop" element={<Admin><AdminShop/></Admin>}/>
+   <Route path="/admin/books" element={<Admin><AdminBooks/></Admin>}/>
+   <Route path="/admin/books/new" element={<Admin><AdminBookEditor/></Admin>}/>
+   <Route path="/admin/books/:slug" element={<Admin><AdminBookEditor/></Admin>}/>
+   <Route path="/admin/books/:slug/chapters/:chapterId" element={<Admin><AdminChapterEditor/></Admin>}/>
    <Route path="*" element={<NotFound/>}/>
-  </Routes>
-  {!bare && <Footer/>}
+  </Routes></PageTransition>
+  {!bare && isHome && <Footer/>}
   {!bare && <MobileNav/>}
  </>
 }
 
 function AuthAndSync() {
  useEffect(() => watchAuth(user => useAuthStore.getState().setUser(user)), [])
- useEffect(() => { initCatalogSync(); initReviewsSync(); initPathsSync(); initChallengesSync(); initAchievementsSync(); initBannersSync(); initSiteSettingsSync() }, [])
+ useEffect(() => { initCatalogSync(); initReviewsSync(); initPathsSync(); initChallengesSync(); initAchievementsSync(); initBannersSync(); initSiteSettingsSync(); initShopSync(); initShopCouponsSync(); initBooksSync() }, [])
  useProgressSync()
  return null
 }

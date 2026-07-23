@@ -1,8 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
-import { addDoc, collection, onSnapshot, query, serverTimestamp, where } from 'firebase/firestore'
+import { addDoc, collection, doc, onSnapshot, query, serverTimestamp, updateDoc, where } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 
 const pairId = (a: string, b: string) => [a, b].sort().join('_')
+
+export type MessageKind = 'text' | 'sticker' | 'poll' | 'post' | 'course'
+
+export type PollData = { question: string; options: string[]; votes: Record<string, number> }
+export type SharedPostData = { id: string; name: string; handle: string; photo?: string; image?: string; text: string; courseTitle?: string }
+export type SharedCourseData = { slug: string; title: string; category: string }
 
 export type Message = {
   id: string
@@ -11,13 +17,21 @@ export type Message = {
   from: string
   to: string
   text: string
+  kind?: MessageKind
+  poll?: PollData
+  sharedPost?: SharedPostData
+  sharedCourse?: SharedCourseData
   createdAt: number
 }
 
-export async function sendMessage(myUid: string, otherUid: string, text: string) {
+export async function sendMessage(myUid: string, otherUid: string, text: string, kind: MessageKind = 'text', payload?: { poll?: PollData; sharedPost?: SharedPostData; sharedCourse?: SharedCourseData }) {
   const trimmed = text.trim()
   if (!trimmed) return
-  await addDoc(collection(db, 'messages'), { conversationId: pairId(myUid, otherUid), participants: [myUid, otherUid], from: myUid, to: otherUid, text: trimmed, createdAt: serverTimestamp() })
+  await addDoc(collection(db, 'messages'), { conversationId: pairId(myUid, otherUid), participants: [myUid, otherUid], from: myUid, to: otherUid, text: trimmed, kind, ...(payload?.poll ? { poll: payload.poll } : {}), ...(payload?.sharedPost ? { sharedPost: payload.sharedPost } : {}), ...(payload?.sharedCourse ? { sharedCourse: payload.sharedCourse } : {}), createdAt: serverTimestamp() })
+}
+
+export async function votePoll(messageId: string, uid: string, optionIndex: number) {
+  await updateDoc(doc(db, 'messages', messageId), { [`poll.votes.${uid}`]: optionIndex })
 }
 
 /** Live thread between exactly two people. Single equality clause only (no orderBy in the
@@ -37,7 +51,7 @@ export function useConversation(myUid?: string | null, otherUid?: string | null)
  return messages
 }
 
-export type ConversationSummary = { otherUid: string; lastText: string; lastAt: number; lastFromMe: boolean }
+export type ConversationSummary = { otherUid: string; lastText: string; lastAt: number; lastFromMe: boolean; lastKind: MessageKind }
 
 /** All of a learner's conversations, most recent first, one row per partner. */
 export function useConversationsList(myUid?: string | null): ConversationSummary[] {
@@ -58,6 +72,6 @@ export function useConversationsList(myUid?: string | null): ConversationSummary
    const existing = latest.get(other)
    if (!existing || message.createdAt > existing.createdAt) latest.set(other, message)
   }
-  return [...latest.values()].sort((a, b) => b.createdAt - a.createdAt).map((message) => ({ otherUid: message.from === myUid ? message.to : message.from, lastText: message.text, lastAt: message.createdAt, lastFromMe: message.from === myUid }))
+  return [...latest.values()].sort((a, b) => b.createdAt - a.createdAt).map((message) => ({ otherUid: message.from === myUid ? message.to : message.from, lastText: message.text, lastAt: message.createdAt, lastFromMe: message.from === myUid, lastKind: message.kind ?? 'text' }))
  }, [messages, myUid])
 }

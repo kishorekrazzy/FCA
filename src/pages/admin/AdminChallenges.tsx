@@ -39,7 +39,7 @@ export function AdminChallenges() {
  const remove = async (id: string) => { if (!window.confirm('Delete this event?')) return; await deleteChallenge(id).catch(() => window.alert('Could not delete — check Firestore rules.')) }
 
  return <div className="admin-page">
-  <header className="admin-header"><div><span className="kicker">Gamification</span><h1>Events</h1><p>Time-boxed goals and one-off events that award bonus IQ — visible to learners at /events.</p></div><button className="button primary" onClick={() => setCreating(true)}><Plus size={15}/> New event</button></header>
+  <header className="admin-header"><div><span className="kicker">Gamification</span><h1>Events</h1><p>Time-boxed goals and one-off events that award bonus IQ — visible to learners on the Playground page.</p></div><button className="button primary" onClick={() => setCreating(true)}><Plus size={15}/> New event</button></header>
   <div className="admin-panel">
    {creating && <ChallengeEditor challenge={emptyChallenge()} onClose={() => setCreating(false)}/>}
    {!challenges.length && !creating && <p className="admin-empty">No events yet — create one to give learners a goal.</p>}

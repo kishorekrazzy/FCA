@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { collection, deleteDoc, doc, onSnapshot, setDoc } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 
-export type BannerPlacement = 'home' | 'academy'
+export type BannerPlacement = 'home' | 'academy' | 'login'
 
 export type Banner = {
   id: string

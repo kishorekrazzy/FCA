@@ -32,12 +32,12 @@ function BannerEditor({ banner, onClose }: { banner: Banner; onClose: () => void
  const save = async () => { setSaving(true); await upsertBanner(draft).catch(() => window.alert('Could not save — check Firestore rules.')); setSaving(false); onClose() }
 
  return <div className="admin-panel path-editor">
-  <label>Image URL (21:9 works best)<input value={draft.imageUrl} onChange={(event) => setDraft({ ...draft, imageUrl: event.target.value })} placeholder="https://images.example.com/banner.jpg"/></label>
+  <label>Image URL ({draft.placement === 'login' ? 'tall portrait works best' : '21:9 works best'})<input value={draft.imageUrl} onChange={(event) => setDraft({ ...draft, imageUrl: event.target.value })} placeholder="https://images.example.com/banner.jpg"/></label>
   <div className={`thumb-preview banner-thumb-preview ${draft.imageUrl ? '' : 'thumb-preview-empty'}`}>{draft.imageUrl ? <img src={draft.imageUrl} alt=""/> : <span>No image set yet.</span>}</div>
   <label>Title (optional overlay text)<input value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} placeholder="e.g. New: Learn How to Learn Anything"/></label>
   <label>Link URL (optional — internal path like /academy, or a full external URL)<input value={draft.linkUrl} onChange={(event) => setDraft({ ...draft, linkUrl: event.target.value })} placeholder="/academy/learn-how-to-learn"/></label>
   <div className="field-row">
-   <label>Show on<select value={draft.placement} onChange={(event) => setDraft({ ...draft, placement: event.target.value as BannerPlacement })}><option value="home">Home page</option><option value="academy">Academy page</option></select></label>
+   <label>Show on<select value={draft.placement} onChange={(event) => setDraft({ ...draft, placement: event.target.value as BannerPlacement })}><option value="home">Home page</option><option value="academy">Academy page</option><option value="login">Login page</option></select></label>
   </div>
   <div className="admin-form-actions"><button className="button primary sm" onClick={save} disabled={saving || !draft.imageUrl}>{saving ? 'Saving…' : 'Save banner'}</button><button className="button ghost sm" onClick={onClose}>Cancel</button></div>
  </div>
@@ -55,7 +55,7 @@ export function AdminBanners() {
   <header className="admin-header"><div><span className="kicker">Site content</span><h1>Banners</h1><p>The homepage hero image, and wide promotional banners shown on the Home and Academy pages.</p></div></header>
   <HeroImageSettings/>
 
-  <div className="admin-panel-head banner-section-head"><h2>Promotional banners</h2><div className="admin-form-actions"><button className="button ghost sm" onClick={() => setCreating('home')}><Plus size={14}/> New home banner</button><button className="button ghost sm" onClick={() => setCreating('academy')}><Plus size={14}/> New academy banner</button></div></div>
+  <div className="admin-panel-head banner-section-head"><h2>Promotional banners</h2><div className="admin-form-actions"><button className="button ghost sm" onClick={() => setCreating('home')}><Plus size={14}/> New home banner</button><button className="button ghost sm" onClick={() => setCreating('academy')}><Plus size={14}/> New academy banner</button><button className="button ghost sm" onClick={() => setCreating('login')}><Plus size={14}/> New login image</button></div></div>
 
   {creating && <BannerEditor banner={emptyBanner(creating)} onClose={() => setCreating(null)}/>}
   {editing && <BannerEditor banner={editing} onClose={() => setEditingId(null)}/>}
@@ -65,7 +65,7 @@ export function AdminBanners() {
   <div className="banner-admin-grid">{banners.map((banner) => <article className="banner-admin-card" key={banner.id}>
    <div className="banner-admin-thumb">{banner.imageUrl ? <img src={banner.imageUrl} alt=""/> : <ImageIcon/>}</div>
    <div className="banner-admin-body">
-    <span className={`banner-placement-tag ${banner.placement}`}>{banner.placement === 'home' ? 'Home' : 'Academy'}</span>
+    <span className={`banner-placement-tag ${banner.placement}`}>{banner.placement === 'home' ? 'Home' : banner.placement === 'academy' ? 'Academy' : 'Login'}</span>
     <b>{banner.title || 'Untitled banner'}</b>
     {banner.linkUrl && <p className="path-course-list">Links to {banner.linkUrl}</p>}
     <footer><button onClick={() => setEditingId(banner.id)}><Pencil size={13}/> Edit</button><button onClick={() => remove(banner.id)} aria-label="Delete banner"><Trash2/> Delete</button></footer>

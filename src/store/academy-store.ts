@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { getPublishedCourses } from '../data/catalog'
+import { getPublishedBooks } from './book-store'
 import { allLessons } from '../types'
 
 const XP_PER_LEVEL = 400
@@ -48,9 +49,37 @@ export type AcademyState = {
   dueReviews: () => string[]
   claimChallenge: (id: string, xp: number) => void
   claimDailyReward: () => void
+  sudokuCompletedDate: string | null
+  sudokuSolvedCount: number
+  recordActivity: (xp: number) => void
+  completeSudoku: (xp: number) => boolean
+  ownedItems: string[]
+  equippedFlair: string | null
+  buyShopItem: (item: { id: string; price: number }) => 'ok' | 'insufficient' | 'owned'
+  grantShopItem: (itemId: string) => void
+  equipFlair: (emoji: string | null) => void
+  completedChapters: string[]
+  completeChapter: (chapter: string, xp: number) => void
+  bookProgress: (bookSlug: string) => number
 }
 
 const bumpActivity = (log: Record<string, number>) => ({ ...log, [dateKey()]: (log[dateKey()] ?? 0) + 1 })
+
+// Shared by any action that should count as "showed up today" — lesson completion,
+// spaced-repetition reviews, and now Playground games all advance the same streak.
+const advanceStreak = (state: Pick<AcademyState, 'streak' | 'streakFreezes' | 'lastActive' | 'activityLog'>) => {
+  const today = new Date().toDateString()
+  const yesterday = new Date(Date.now() - DAY).toDateString()
+  const dayBeforeYesterday = new Date(Date.now() - 2 * DAY).toDateString()
+  let streak = state.streak
+  let streakFreezes = state.streakFreezes
+  if (state.lastActive === today) streak = Math.max(state.streak, 1)
+  else if (state.lastActive === yesterday) streak = state.streak + 1
+  else if (state.lastActive === dayBeforeYesterday && state.streakFreezes > 0) { streak = state.streak + 1; streakFreezes -= 1 }
+  else streak = 1
+  if (streak > 0 && streak % 7 === 0 && streakFreezes < MAX_STREAK_FREEZES) streakFreezes += 1
+  return { streak, streakFreezes, lastActive: today, activityLog: bumpActivity(state.activityLog) }
+}
 
 export const useAcademyStore = create<AcademyState>()(persist((set, get) => ({
   enrolled: [],
@@ -73,27 +102,12 @@ export const useAcademyStore = create<AcademyState>()(persist((set, get) => ({
   enroll: (course) => set((state) => ({ enrolled: state.enrolled.includes(course) ? state.enrolled : [...state.enrolled, course] })),
   complete: (courseSlug, lesson, xp) => set((state) => {
     if (state.completed.includes(lesson)) return state
-    const today = new Date().toDateString()
-    const yesterday = new Date(Date.now() - DAY).toDateString()
-    const dayBeforeYesterday = new Date(Date.now() - 2 * DAY).toDateString()
-    let streak = state.streak
-    let streakFreezes = state.streakFreezes
-    if (state.lastActive === today) streak = Math.max(state.streak, 1)
-    else if (state.lastActive === yesterday) streak = state.streak + 1
-    else if (state.lastActive === dayBeforeYesterday && state.streakFreezes > 0) { streak = state.streak + 1; streakFreezes -= 1 }
-    else streak = 1
-    // A streak freeze auto-covers exactly one missed day. Earn one back every full
-    // week kept alive, capped so they can't be hoarded indefinitely.
-    if (streak > 0 && streak % 7 === 0 && streakFreezes < MAX_STREAK_FREEZES) streakFreezes += 1
     return {
       completed: [...state.completed, lesson],
       xp: state.xp + xp,
-      streak,
-      streakFreezes,
-      lastActive: today,
       enrolled: state.enrolled.includes(courseSlug) ? state.enrolled : [...state.enrolled, courseSlug],
       reviews: { ...state.reviews, [lesson]: { due: Date.now() + DAY, interval: 1, ease: 2.5, reps: 0 } },
-      activityLog: bumpActivity(state.activityLog),
+      ...advanceStreak(state),
     }
   }),
   toggleReader: () => set((state) => ({ reader: !state.reader })),
@@ -125,6 +139,37 @@ export const useAcademyStore = create<AcademyState>()(persist((set, get) => ({
     const streak = state.dailyReward.lastClaimedDate === yesterday ? state.dailyReward.streak + 1 : 1
     return { xp: state.xp + dailyRewardAmount(streak), dailyReward: { lastClaimedDate: today, streak } }
   }),
+  sudokuCompletedDate: null,
+  sudokuSolvedCount: 0,
+  recordActivity: (xp) => set((state) => ({ xp: state.xp + xp, ...advanceStreak(state) })),
+  completeSudoku: (xp) => {
+    const state = get()
+    const today = dateKey()
+    if (state.sudokuCompletedDate === today) return false
+    set((current) => ({ xp: current.xp + xp, sudokuCompletedDate: today, sudokuSolvedCount: current.sudokuSolvedCount + 1, ...advanceStreak(current) }))
+    return true
+  },
+  ownedItems: [],
+  equippedFlair: null,
+  buyShopItem: (item) => {
+    const state = get()
+    if (state.ownedItems.includes(item.id)) return 'owned'
+    if (state.xp < item.price) return 'insufficient'
+    set((current) => ({ xp: current.xp - item.price, ownedItems: [...current.ownedItems, item.id] }))
+    return 'ok'
+  },
+  grantShopItem: (itemId) => set((state) => state.ownedItems.includes(itemId) ? state : { ownedItems: [...state.ownedItems, itemId] }),
+  equipFlair: (emoji) => set({ equippedFlair: emoji }),
+  completedChapters: [],
+  completeChapter: (chapter, xp) => set((state) => {
+    if (state.completedChapters.includes(chapter)) return state
+    return { completedChapters: [...state.completedChapters, chapter], xp: state.xp + xp, ...advanceStreak(state) }
+  }),
+  bookProgress: (bookSlug) => {
+    const book = getPublishedBooks().find((item) => item.slug === bookSlug)
+    if (!book || !book.chapters.length) return 0
+    return Math.round((book.chapters.filter((chapter) => get().completedChapters.includes(chapter.slug)).length / book.chapters.length) * 100)
+  },
 }), { name: 'academy-progress' }))
 
 export const countCertificates = (completed: string[]) => getPublishedCourses().filter((course) => { const lessons = allLessons(course); return lessons.length > 0 && lessons.every((lesson) => completed.includes(lesson.slug)) }).length

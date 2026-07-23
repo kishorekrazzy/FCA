@@ -2,8 +2,10 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronDown, ChevronUp, Layers, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useAllCoursesAdmin, isSeedCourse } from '../../data/catalog'
-import { useCatalogStore, deleteCourseRemote, setCourseOrderRemote, upsertCourseFields } from '../../store/catalog-store'
-import { allLessons } from '../../types'
+import { useCatalogStore, deleteCourseRemote, setCourseOrderRemote, upsertCourseFields, upsertCourseRemote } from '../../store/catalog-store'
+import { JsonImport } from '../../components/admin/JsonImport'
+import { COURSE_JSON_TEMPLATE } from '../../data/json-templates'
+import { allLessons, emptyCourse } from '../../types'
 import type { Course } from '../../types'
 
 const contentHealth = (course: Course) => {
@@ -36,7 +38,7 @@ export function AdminCourses() {
  const onRowMove = (event: React.MouseEvent<HTMLTableRowElement>) => { const el = event.currentTarget; const rect = el.getBoundingClientRect(); el.style.setProperty('--mx', `${event.clientX - rect.left}px`); el.style.setProperty('--my', `${event.clientY - rect.top}px`) }
 
  return <div className="admin-page">
-  <header className="admin-header"><div><span className="kicker">Content</span><h1>Courses</h1><p>Create, order, and publish courses. Changes save straight to Firestore and go live for every visitor.</p></div><Link className="button primary" to="/admin/courses/new"><Plus/> New course</Link></header>
+  <header className="admin-header"><div><span className="kicker">Content</span><h1>Courses</h1><p>Create, order, and publish courses. Changes save straight to Firestore and go live for every visitor.</p></div><div className="admin-header-actions"><JsonImport noun="course" template={COURSE_JSON_TEMPLATE} emptyItem={emptyCourse} upsertItem={upsertCourseRemote}/><Link className="button primary" to="/admin/courses/new"><Plus/> New course</Link></div></header>
   {!online && <p className="admin-banner">Firestore isn't reachable right now — edits here won't save. Check your connection or Firestore rules for the <code>courses</code> collection.</p>}
   <div className="admin-panel">
    <table className="admin-table wide"><thead><tr><th/><th>Cover</th><th>Course</th><th>Status</th><th>Lessons</th><th>Content health</th><th>Category</th><th>Difficulty</th><th/></tr></thead><tbody>{courses.map((course, index) => <tr key={course.slug} className="fx-spotlight" onMouseMove={onRowMove}>
